@@ -14,7 +14,10 @@ html, body {
 }
 body {
   font-family: Inter, system-ui, sans-serif;
-  background: linear-gradient(135deg, #040810, var(--bg) 42%, #091423 100%);
+  background:
+    radial-gradient(circle at top left, rgba(79, 227, 185, 0.1), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(89, 183, 255, 0.1), transparent 26%),
+    linear-gradient(135deg, #040810, var(--bg) 42%, #091423 100%);
   color: var(--text);
   overflow: hidden;
 }
@@ -47,6 +50,29 @@ body {
   backdrop-filter: blur(14px);
 }
 
+.zoom-stack {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  display: grid;
+  gap: 10px;
+}
+
+.zoom-btn {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(7, 13, 24, 0.88);
+  color: var(--text);
+  font-size: 1.4rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
 .hud-btn {
   appearance: none;
   border: 0;
@@ -56,6 +82,12 @@ body {
   color: var(--text);
   font-weight: 700;
   cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.hud-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.12);
 }
 
 .hud-pill {
@@ -76,6 +108,98 @@ body {
   border: 1px solid rgba(255, 107, 107, 0.22);
   color: #ffd0d0;
   box-shadow: var(--shadow);
+}
+
+.case-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 8, 18, 0.56);
+  backdrop-filter: blur(10px);
+}
+
+.case-card {
+  width: min(720px, 100%);
+  border-radius: 28px;
+  padding: 22px;
+  background: linear-gradient(180deg, rgba(11, 20, 35, 0.98), rgba(8, 14, 26, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.case-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.case-card h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.case-copy {
+  margin: 12px 0 18px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.case-close {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.case-item {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.case-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.case-item strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.case-item span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .map-pin {
@@ -112,6 +236,14 @@ body {
   background: linear-gradient(135deg, #ffcf87, #ff9e5f);
 }
 
+.map-pin-ambulance span {
+  box-shadow: 0 0 0 8px rgba(79, 227, 185, 0.12);
+}
+
+.map-pin-hospital span {
+  box-shadow: 0 0 0 8px rgba(103, 233, 192, 0.12);
+}
+
 .current-dot {
   width: 16px;
   height: 16px;
@@ -119,6 +251,10 @@ body {
   background: #59b7ff;
   border: 3px solid rgba(255,255,255,0.95);
   box-shadow: 0 0 0 10px rgba(89, 183, 255, 0.18);
+}
+
+.leaflet-container {
+  background: #08111d;
 }
 
 .current-ring {
@@ -139,9 +275,13 @@ body {
 @media (max-width: 640px) {
   .hud {
     right: 16px;
+    left: 16px;
     flex-wrap: wrap;
   }
   .hud-pill {
     width: 100%;
+  }
+  .case-grid {
+    grid-template-columns: 1fr;
   }
 }

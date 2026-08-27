@@ -1,39 +1,57 @@
 const centerBtn = document.getElementById('centerBtn');
 const locBtn = document.getElementById('locBtn');
+const caseBtn = document.getElementById('caseBtn');
+const zoomInBtn = document.getElementById('zoomInBtn');
+const zoomOutBtn = document.getElementById('zoomOutBtn');
 const statusPill = document.getElementById('statusPill');
 const geoError = document.getElementById('geoError');
+const caseModal = document.getElementById('caseModal');
+const caseGrid = document.getElementById('caseGrid');
+const caseCloseBtn = document.getElementById('caseCloseBtn');
 
-const colors = {
-  route: '#4fe3b9',
-  alt: '#94a3b8',
-  current: '#59b7ff',
+const patientCases = [
+  { id: 'umum', label: 'Umum', hint: 'Keluhan umum, demam, lemas.' },
+  { id: 'trauma', label: 'Trauma', hint: 'Kecelakaan, luka berat, patah tulang.' },
+  { id: 'jantung', label: 'Jantung', hint: 'Nyeri dada, sesak, serangan jantung.' },
+  { id: 'anak', label: 'Anak', hint: 'Pasien anak dan bayi.' },
+  { id: 'ibu', label: 'Ibu & Bayi', hint: 'Persalinan dan kondisi obstetri.' },
+  { id: 'igd', label: 'IGD Terdekat', hint: 'Langsung ke instalasi gawat darurat.' },
+];
+
+const soloHospitals = [
+  { name: 'RSUD Dr. Moewardi', latlng: [-7.558, 110.7758], tags: { emergency: 'yes' } },
+  { name: 'RS Ortopedi Prof. Dr. R. Soeharso', latlng: [-7.557653, 110.773923], tags: { emergency: 'yes' } },
+  { name: 'RS Kasih Ibu Surakarta', latlng: [-7.5592, 110.8062], tags: { emergency: 'yes' } },
+  { name: 'RSUD Bung Karno Surakarta', latlng: [-7.5495, 110.8396], tags: { emergency: 'yes' } },
+  { name: 'RS PKU Muhammadiyah Surakarta', latlng: [-7.5652, 110.8162], tags: { emergency: 'yes' } },
+  { name: 'RS Dr. Oen Solo Baru', latlng: [-7.6014, 110.8189], tags: { emergency: 'yes' } },
+];
+
+const hospitalKeywords = {
+  umum: ['rsud', 'rumah sakit', 'hospital'],
+  trauma: ['trauma', 'ortopedi', 'rsud'],
+  jantung: ['jantung', 'cardio', 'heart'],
+  anak: ['anak', 'bunda', 'rsia'],
+  ibu: ['ibu', 'bunda', 'bersalin', 'maternal'],
+  igd: ['igd', 'emergency', 'rsud', 'rumah sakit'],
 };
 
 let map;
 let ambulanceMarker;
 let hospitalMarker;
-let currentMarker;
-let routeLine;
-let altRouteLine;
-let watchId = null;
+let userHalo;
+let userDot;
+let routeControl;
 let lastPosition = null;
+let activeCase = 'igd';
+let activeHospital = soloHospitals[0];
+let followUser = true;
 
-const target = [-7.5459, 110.8367];
 const fallbackCenter = [-7.5566, 110.8205];
 
-function setStatus(text) {
-  statusPill.textContent = text;
-}
-
-function showError(text) {
-  geoError.textContent = text;
-  geoError.hidden = false;
-}
-
-function hideError() {
-  geoError.hidden = true;
-  geoError.textContent = '';
-}
+function setStatus(text) { statusPill.textContent = text; }
+function showError(text) { geoError.textContent = text; geoError.hidden = false; }
+function hideError() { geoError.hidden = true; geoError.textContent = ''; }
 
 function createPin(label, className) {
   return L.divIcon({
@@ -44,147 +62,167 @@ function createPin(label, className) {
   });
 }
 
-function computeRoutePoints(fromLatLng) {
-  const [lat, lng] = fromLatLng;
-  const mid1 = [lat + 0.0035, lng + 0.0030];
-  const mid2 = [lat + 0.0065, lng + 0.0090];
-  const mid3 = [target[0] + 0.0020, target[1] - 0.0035];
-  return [fromLatLng, mid1, mid2, mid3, target];
+function renderCases() {
+  caseGrid.innerHTML = '';
+  patientCases.forEach((item) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'case-item';
+    button.innerHTML = `<strong>${item.label}</strong><span>${item.hint}</span>`;
+    button.addEventListener('click', () => {
+      activeCase = item.id;
+      caseModal.hidden = true;
+      if (lastPosition) chooseHospital(lastPosition);
+      setStatus(`Kondisi dipilih: ${item.label}`);
+    });
+    caseGrid.appendChild(button);
+  });
 }
 
-function updateRoute(fromLatLng) {
-  const route = computeRoutePoints(fromLatLng);
-  const altRoute = [
-    fromLatLng,
-    [fromLatLng[0] + 0.0020, fromLatLng[1] - 0.0020],
-    [fromLatLng[0] + 0.0055, fromLatLng[1] + 0.0060],
-    [target[0] + 0.0030, target[1] - 0.0045],
-    target,
+function haversineKm(a, b) {
+  const r = 6371;
+  const dLat = ((b[0] - a[0]) * Math.PI) / 180;
+  const dLng = ((b[1] - a[1]) * Math.PI) / 180;
+  const lat1 = (a[0] * Math.PI) / 180;
+  const lat2 = (b[0] * Math.PI) / 180;
+  return 2 * r * Math.asin(Math.sqrt(Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2));
+}
+
+function normalize(text = '') {
+  return text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
+}
+
+function scoreHospital(hospital) {
+  const name = normalize(hospital.name);
+  const keywords = hospitalKeywords[activeCase] || hospitalKeywords.igd;
+  let score = 0;
+  for (const keyword of keywords) if (name.includes(keyword)) score += 3;
+  if (name.includes('igd')) score += 2;
+  if (name.includes('rsud')) score += 2;
+  if (hospital.tags?.emergency === 'yes') score += 1;
+  return score;
+}
+
+function nearestHospital(fromLatLng) {
+  return [...soloHospitals]
+    .map((hospital) => ({ ...hospital, distance: haversineKm(fromLatLng, hospital.latlng), score: scoreHospital(hospital) }))
+    .sort((a, b) => (b.score - a.score) || (a.distance - b.distance))[0];
+}
+
+function buildRouteUrl(fromLatLng, toLatLng) {
+  return `https://router.project-osrm.org/route/v1/driving/${fromLatLng[1]},${fromLatLng[0]};${toLatLng[1]},${toLatLng[0]}?overview=full&geometries=geojson&steps=true`;
+}
+
+function drawRoute(fromLatLng, toLatLng, hospitalName) {
+  setStatus(`Mencari rute ke ${hospitalName}...`);
+  const waypoints = [
+    L.latLng(fromLatLng[0], fromLatLng[1]),
+    L.latLng(toLatLng[0], toLatLng[1]),
   ];
 
-  routeLine.setLatLngs(route);
-  altRouteLine.setLatLngs(altRoute);
-  ambulanceMarker.setLatLng(fromLatLng);
-  currentMarker.setLatLng(fromLatLng);
-  map.panTo(fromLatLng, { animate: true, duration: 0.5 });
-  setStatus('Lokasi terdeteksi');
-  hideError();
+  if (!routeControl) {
+    routeControl = L.Routing.control({
+      waypoints,
+      router: L.Routing.osrmv1({
+        serviceUrl: 'https://router.project-osrm.org/route/v1',
+        profile: 'driving',
+      }),
+      routeWhileDragging: false,
+      draggableWaypoints: false,
+      addWaypoints: false,
+      showAlternatives: false,
+      fitSelectedRoutes: true,
+      show: false,
+      createMarker: () => null,
+      lineOptions: {
+        styles: [{ color: '#4fe3b9', opacity: 0.98, weight: 6 }],
+      },
+    })
+      .on('routesfound', (event) => {
+        const route = event.routes?.[0];
+        if (!route) return;
+        const km = (route.summary.totalDistance / 1000).toFixed(1);
+        const min = Math.max(1, Math.round(route.summary.totalTime / 60));
+        setStatus(`Menuju ${hospitalName} • ${km} km • ${min} menit`);
+        hideError();
+      })
+      .on('routingerror', () => {
+        showError('Rute asli gagal dimuat. Coba pilih lagi atau cek koneksi.');
+        setStatus('Rute belum tersedia');
+      })
+      .addTo(map);
+    return;
+  }
+
+  routeControl.setWaypoints(waypoints);
 }
 
-function updateFromGeo(position) {
+function chooseHospital(fromLatLng) {
+  activeHospital = nearestHospital(fromLatLng);
+  hospitalMarker.setLatLng(activeHospital.latlng);
+  drawRoute(fromLatLng, activeHospital.latlng, activeHospital.name);
+}
+
+function setUserPosition(position) {
   const { latitude, longitude, accuracy } = position.coords;
-  lastPosition = [latitude, longitude];
-  updateRoute(lastPosition);
-  setStatus(`Lokasi terdeteksi, akurasi ±${Math.round(accuracy)} m`);
+  const next = [latitude, longitude];
+  const prev = lastPosition || next;
+  lastPosition = next;
+  ambulanceMarker.setLatLng(next);
+  userHalo.setLatLng(next);
+  userDot.setLatLng(next);
+  if (followUser) map.panTo(next, { animate: true, duration: 0.5 });
+  chooseHospital(next);
+  setStatus(`Lokasi Anda • akurasi ±${Math.round(accuracy)} m`);
+}
+
+function initMap() {
+  map = L.map('map', {
+    zoomControl: false,
+    attributionControl: false,
+    scrollWheelZoom: true,
+  }).setView(fallbackCenter, 15);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+  ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('AMB', 'map-pin-ambulance') }).addTo(map);
+  hospitalMarker = L.marker(soloHospitals[0].latlng, { icon: createPin('RS', 'map-pin-hospital') }).addTo(map);
+  userHalo = L.marker(fallbackCenter, {
+    icon: L.divIcon({ className: 'current-ring', iconSize: [40, 40], iconAnchor: [20, 20] }),
+    interactive: false,
+  }).addTo(map);
+  userDot = L.marker(fallbackCenter, {
+    icon: L.divIcon({ className: 'current-dot', iconSize: [16, 16], iconAnchor: [8, 8] }),
+    interactive: false,
+  }).addTo(map);
+
+  map.on('dragstart', () => { followUser = false; });
 }
 
 function startTracking() {
   if (!navigator.geolocation) {
-    showError('Browser Anda tidak mendukung pelacakan lokasi.');
-    setStatus('Lokasi tidak tersedia');
+    showError('Browser Anda tidak mendukung lokasi.');
     return;
   }
-
-  watchId = navigator.geolocation.watchPosition(
-    updateFromGeo,
-    () => {
-      showError('Izin lokasi belum aktif. Izinkan akses lokasi untuk navigasi realtime.');
-      setStatus('Menunggu izin lokasi');
-      if (!lastPosition) {
-        updateRoute(fallbackCenter);
-      }
-    },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 1000,
-      timeout: 10000,
-    },
-  );
-}
-
-function initializeMap() {
-  map = L.map('map', {
-    zoomControl: false,
-    attributionControl: false,
-    scrollWheelZoom: false,
-  }).setView(fallbackCenter, 15);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-  }).addTo(map);
-
-  ambulanceMarker = L.marker(fallbackCenter, {
-    icon: createPin('AMB', 'map-pin-ambulance'),
-  }).addTo(map);
-
-  hospitalMarker = L.marker(target, {
-    icon: createPin('IGD', 'map-pin-hospital'),
-  }).addTo(map);
-
-  currentMarker = L.marker(fallbackCenter, {
-    icon: L.divIcon({
-      className: 'current-ring',
-      iconSize: [40, 40],
-      iconAnchor: [20, 20],
-    }),
-    interactive: false,
-  }).addTo(map);
-
-  routeLine = L.polyline([], {
-    color: colors.route,
-    weight: 6,
-    opacity: 0.95,
-    lineJoin: 'round',
-    dashArray: '12 18',
-  }).addTo(map);
-
-  altRouteLine = L.polyline([], {
-    color: colors.alt,
-    weight: 5,
-    opacity: 0.2,
-    lineJoin: 'round',
-    dashArray: '8 14',
-  }).addTo(map);
-
-  L.circleMarker(target, {
-    radius: 11,
-    color: '#04131a',
-    weight: 2,
-    fillColor: '#67e9c0',
-    fillOpacity: 1,
-  }).addTo(map);
-
-  map.on('locationfound', updateFromGeo);
-  map.on('locationerror', () => {
-    showError('Lokasi tidak dapat dibaca. Coba aktifkan GPS atau gunakan jaringan yang lebih stabil.');
-    setStatus('Lokasi tidak aktif');
-  });
+  navigator.geolocation.watchPosition(setUserPosition, () => {
+    showError('Izin lokasi belum aktif.');
+    setStatus('Menunggu izin lokasi');
+  }, { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 });
 }
 
 centerBtn.addEventListener('click', () => {
-  if (lastPosition) {
-    map.flyTo(lastPosition, Math.max(map.getZoom(), 15), { duration: 0.5 });
-  } else {
-    map.flyTo(fallbackCenter, 15, { duration: 0.5 });
-  }
+  followUser = true;
+  map.flyTo(lastPosition || fallbackCenter, Math.max(map.getZoom(), 15), { duration: 0.5 });
 });
+locBtn.addEventListener('click', () => navigator.geolocation?.getCurrentPosition(setUserPosition, () => showError('Akses lokasi ditolak.'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }));
+caseBtn.addEventListener('click', () => { caseModal.hidden = false; });
+caseCloseBtn.addEventListener('click', () => { caseModal.hidden = true; });
+caseModal.addEventListener('click', (e) => { if (e.target === caseModal) caseModal.hidden = true; });
+zoomInBtn.addEventListener('click', () => map.zoomIn());
+zoomOutBtn.addEventListener('click', () => map.zoomOut());
 
-locBtn.addEventListener('click', () => {
-  if (!navigator.geolocation) {
-    showError('Browser Anda tidak mendukung pelacakan lokasi.');
-    return;
-  }
-  setStatus('Meminta lokasi...');
-  navigator.geolocation.getCurrentPosition(
-    updateFromGeo,
-    () => {
-      showError('Akses lokasi ditolak. Aktifkan izin lokasi di browser.');
-      setStatus('Izin lokasi diperlukan');
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-  );
-});
-
-initializeMap();
+renderCases();
+initMap();
 startTracking();
-setStatus('Menunggu lokasi Anda');
+caseModal.hidden = false;
+setStatus('Pilih kondisi pasien');
