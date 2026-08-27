@@ -53,8 +53,8 @@ body {
 
 .hero {
   display: grid;
-  grid-template-columns: 1.15fr 0.95fr;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 28px;
   padding: 28px;
 }
 .hero-copy { padding: 10px 6px 10px 4px; }
@@ -107,8 +107,9 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 }
 .map-stage {
   display: grid;
-  grid-template-columns: 0.78fr 1.22fr;
-  gap: 16px;
+  grid-template-columns: 0.58fr 1.42fr;
+  gap: 14px;
+  align-items: stretch;
 }
 .places-card {
   background: rgba(11, 18, 30, 0.95);
@@ -116,6 +117,7 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   border-radius: 24px;
   padding: 18px;
   min-height: 520px;
+  max-height: 520px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -305,6 +307,7 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   display: grid;
   gap: 12px;
   grid-auto-rows: min-content;
+  align-content: start;
 }
 .route-card {
   padding: 16px;
