@@ -14,6 +14,12 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -99,43 +105,13 @@
             </aside>
 
             <div class="map-panel">
-              <div class="map-grid"></div>
-              <div class="map-frame"></div>
-              <div class="district-label north">RSUD Utara</div>
-              <div class="district-label center">Pasar Baru</div>
-              <div class="district-label south">Koridor Trauma</div>
-              <div class="district-label west">Stasiun Barat</div>
-              <div class="district-label east">Kawasan Medis</div>
-
-              <div class="road road-main"></div>
-              <div class="road road-cross"></div>
-              <div class="road road-curve"></div>
-              <div class="road road-ring"></div>
-
-              <div class="road road-slab road-a"></div>
-              <div class="road road-slab road-b"></div>
-              <div class="road road-slab road-c"></div>
-              <div class="road road-slab road-d"></div>
-
-              <svg viewBox="0 0 640 420" class="route-svg" aria-hidden="true">
-                <path id="routePath" d="M 70 294 C 126 270, 165 244, 206 218 S 294 182, 350 164 S 486 142, 560 106" />
-                <path id="altRoutePath" d="M 78 320 C 140 300, 184 280, 238 248 S 334 208, 402 212 S 500 186, 562 154" />
-              </svg>
-
-              <div class="node ambulance" id="ambulanceNode" style="left: 10%; top: 78%">
-                <span>AMB</span>
-              </div>
-              <div class="node incident hazard" style="left: 37%; top: 61%">
-                <span>KAC</span>
-              </div>
-              <div class="node signal" style="left: 55%; top: 50%">
-                <span>TL</span>
-              </div>
-              <div class="node hospital" style="left: 91%; top: 22%">
-                <span>IGD</span>
-              </div>
-              <div class="node control" style="left: 76%; top: 63%">
-                <span>DSP</span>
+              <div id="map"></div>
+              <div class="map-overlay">
+                <div class="district-label north">RSUD Utara</div>
+                <div class="district-label center">Pasar Baru</div>
+                <div class="district-label south">Koridor Trauma</div>
+                <div class="district-label west">Stasiun Barat</div>
+                <div class="district-label east">Kawasan Medis</div>
               </div>
             </div>
 
@@ -276,6 +252,11 @@
       </section>
     </main>
 
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
     <script src="app.js"></script>
   </body>
 </html>

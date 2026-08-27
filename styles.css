@@ -218,34 +218,70 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   position: relative;
   min-height: 520px;
   border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(7, 15, 29, 0.98), rgba(8, 16, 31, 0.98)),
-    radial-gradient(circle at 20% 20%, rgba(79, 227, 185, 0.08), transparent 35%);
+  background: #0a1020;
   border: 1px solid rgba(255,255,255,0.08);
   overflow: hidden;
 }
-.map-grid {
-  position: absolute; inset: 0;
-  background-image: linear-gradient(rgba(148,197,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148,197,255,0.08) 1px, transparent 1px);
-  background-size: 52px 52px;
-  opacity: 0.22;
+#map .leaflet-pane,
+#map .leaflet-top,
+#map .leaflet-bottom {
+  z-index: 1;
 }
-.map-frame {
-  position: absolute;
-  inset: 16px;
-  border-radius: 26px;
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: inset 0 0 0 1px rgba(104, 166, 255, 0.05);
+.map-pin {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, -50%);
+  position: relative;
 }
-.map-frame::before {
+.map-pin::before {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 80% 20%, rgba(104, 166, 255, 0.12), transparent 20%),
-    radial-gradient(circle at 24% 33%, rgba(79, 227, 185, 0.14), transparent 18%);
+  border-radius: 50%;
+  filter: blur(0.5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+}
+.map-pin span {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+  z-index: 1;
+  font-weight: 800;
+  color: #08111c;
+  letter-spacing: 0.03em;
+  border: 2px solid rgba(255,255,255,0.28);
+}
+.map-pin-ambulance span {
+  background: linear-gradient(135deg, #effcff, #c8f0ff);
+}
+.map-pin-hospital span {
+  background: linear-gradient(135deg, #9df9de, #67e9c0);
+}
+.map-pin-incident span {
+  background: linear-gradient(135deg, #ffcf87, #ff9e5f);
+}
+#map {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
   pointer-events: none;
+}
+.map-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10,16,32,0.08), rgba(10,16,32,0.26));
 }
 .district-label {
   position: absolute;
@@ -259,53 +295,11 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   backdrop-filter: blur(6px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
-.north { left: 6%; top: 10%; }
-.center { left: 37%; top: 39%; }
-.south { left: 58%; top: 79%; }
-.west { left: 10%; top: 58%; }
-.east { left: 76%; top: 19%; }
-.road {
-  position: absolute;
-  background: linear-gradient(180deg, rgba(187, 205, 224, 0.14), rgba(187, 205, 224, 0.04));
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: 999px;
-  z-index: 1;
-}
-.road-main { left: 7%; top: 66%; width: 83%; height: 20px; }
-.road-cross { left: 44%; top: 10%; width: 18px; height: 80%; }
-.road-curve { left: 19%; top: 26%; width: 62%; height: 16px; transform: rotate(18deg); transform-origin: center; }
-.road-ring { left: 53%; top: 23%; width: 23%; height: 23%; border-radius: 30px; }
-.road-slab {
-  height: 14px;
-  opacity: 0.65;
-}
-.road-a { left: 15%; top: 34%; width: 28%; transform: rotate(22deg); }
-.road-b { left: 29%; top: 56%; width: 24%; transform: rotate(-14deg); }
-.road-c { left: 64%; top: 35%; width: 18%; transform: rotate(-48deg); }
-.road-d { left: 70%; top: 58%; width: 16%; transform: rotate(8deg); }
-.route-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-#routePath, #altRoutePath {
-  fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 8; stroke-dasharray: 12 18;
-}
-#routePath { stroke: rgba(79, 227, 185, 0.95); filter: drop-shadow(0 0 12px rgba(79, 227, 185, 0.45)); }
-#altRoutePath { stroke: rgba(104, 166, 255, 0.16); }
-.node {
-  position: absolute; width: 42px; height: 42px; border-radius: 50%;
-  display: grid; place-items: center; font-weight: 800; color: #07111f; transform: translate(-50%, -50%);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-  z-index: 3;
-  font-size: 0.74rem;
-  line-height: 1;
-  text-align: center;
-  padding: 4px;
-}
-.ambulance { background: linear-gradient(135deg, #f4fbff, #c8f0ff); box-shadow: 0 18px 40px rgba(0,0,0,0.35), 0 0 0 12px rgba(193, 235, 255, 0.08); }
-.incident { background: linear-gradient(135deg, #ffcf87, #ff9e5f); }
-.hospital { background: linear-gradient(135deg, #9df9de, #67e9c0); }
-.control { background: linear-gradient(135deg, #88a9ff, #5f8cff); }
-.signal { background: linear-gradient(135deg, #ffe89a, #ffd15e); }
-.hazard { outline: 2px solid rgba(255, 107, 107, 0.32); }
-.node span { display: block; transform: scale(0.96); }
+.north { left: 7%; top: 12%; }
+.center { left: 39%; top: 41%; }
+.south { left: 60%; top: 79%; }
+.west { left: 12%; top: 57%; }
+.east { left: 77%; top: 19%; }
 
 .route-panel {
   display: grid;
