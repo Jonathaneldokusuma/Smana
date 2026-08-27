@@ -60,6 +60,20 @@ function hideError() { geoError.hidden = true; geoError.textContent = ''; }
 function openCallModal() { callModal.hidden = false; }
 function closeCallModal() { callModal.hidden = true; }
 
+function getCurrentPosition() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation unsupported'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    });
+  });
+}
+
 function createPin(label, className) {
   return L.divIcon({
     className: `map-pin ${className}`,
@@ -250,10 +264,21 @@ callPhoneBtn.addEventListener('click', () => {
 });
 callWhatsAppBtn.addEventListener('click', () => {
   const phone = '6281234567890';
-  const message = encodeURIComponent('Halo, saya butuh ambulans. Mohon kirim bantuan ke lokasi saya sekarang.');
-  setStatus('Membuka WhatsApp ambulans...');
+  const baseMessage = 'Halo, saya butuh ambulans. Mohon kirim bantuan ke lokasi saya sekarang.';
+  setStatus('Mempersiapkan WhatsApp ambulans...');
   closeCallModal();
-  window.open(`https://wa.me/${phone}?text=${message}`, '_blank', 'noopener,noreferrer');
+
+  getCurrentPosition()
+    .then((position) => {
+      const { latitude, longitude } = position.coords;
+      const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+      const message = encodeURIComponent(`${baseMessage}\nLokasi saya: ${mapsLink}`);
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank', 'noopener,noreferrer');
+    })
+    .catch(() => {
+      const message = encodeURIComponent(baseMessage);
+      window.open(`https://wa.me/${phone}?text=${message}`, '_blank', 'noopener,noreferrer');
+    });
 });
 
 renderCases();
