@@ -53,11 +53,18 @@ body {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-  gap: 20px;
-  padding: 22px;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 16px;
 }
-.hero-copy { padding: 10px 6px 10px 4px; }
+.hero-copy {
+  padding: 12px 14px;
+  max-width: 420px;
+  background: rgba(7, 13, 24, 0.86);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 22px;
+  box-shadow: 0 16px 30px rgba(0,0,0,0.22);
+}
 .eyebrow, .section-label {
   margin: 0 0 10px;
   text-transform: uppercase;
@@ -69,7 +76,7 @@ body {
 h1, h2, h3 { font-family: Space Grotesk, Inter, sans-serif; margin: 0; }
 h1 { font-size: clamp(2.2rem, 5.4vw, 4.2rem); line-height: 0.92; max-width: 9ch; }
 .lede, .body-copy, .flow-item span, .meta-label, .incident-row small { color: var(--muted); }
-.lede { font-size: 0.98rem; line-height: 1.65; max-width: 48ch; margin: 16px 0 0; }
+.lede { font-size: 0.95rem; line-height: 1.55; max-width: 40ch; margin: 12px 0 0; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
 .btn {
   border: 0; border-radius: 999px; padding: 14px 18px; font-weight: 700; font-size: 0.95rem;
@@ -80,10 +87,10 @@ h1 { font-size: clamp(2.2rem, 5.4vw, 4.2rem); line-height: 0.92; max-width: 9ch;
 .secondary { color: var(--text); background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line); }
 
 .stats-grid {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
 }
 .stat {
-  padding: 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px; border-radius: 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .stat span, .meta-label { display: block; font-size: 0.85rem; margin-bottom: 8px; }
 .stat strong { font-size: 1.4rem; }
@@ -107,21 +114,12 @@ h1 { font-size: clamp(2.2rem, 5.4vw, 4.2rem); line-height: 0.92; max-width: 9ch;
 }
 .map-stage {
   display: grid;
-  grid-template-columns: 0.34fr 1.66fr;
+  grid-template-columns: 1fr;
   gap: 12px;
   align-items: stretch;
 }
 .places-card {
-  background: rgba(11, 18, 30, 0.95);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
-  padding: 16px;
-  min-height: 560px;
-  max-height: 560px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  box-shadow: inset 0 0 0 1px rgba(104,166,255,0.04);
+  display: none;
 }
 .place-hero {
   display: flex;
@@ -218,7 +216,8 @@ h1 { font-size: clamp(2.2rem, 5.4vw, 4.2rem); line-height: 0.92; max-width: 9ch;
 }
 .map-panel {
   position: relative;
-  min-height: 560px;
+  min-height: 74vh;
+  height: calc(100vh - 210px);
   border-radius: 28px;
   background: #0a1020;
   border: 1px solid rgba(255,255,255,0.08);
@@ -287,11 +286,11 @@ h1 { font-size: clamp(2.2rem, 5.4vw, 4.2rem); line-height: 0.92; max-width: 9ch;
 }
 .district-label {
   position: absolute;
-  font-size: 0.68rem;
-  color: rgba(239, 246, 255, 0.76);
-  background: rgba(4, 12, 21, 0.68);
+  font-size: 0.62rem;
+  color: rgba(239, 246, 255, 0.72);
+  background: rgba(4, 12, 21, 0.62);
   border: 1px solid rgba(255,255,255,0.08);
-  padding: 7px 11px;
+  padding: 6px 10px;
   border-radius: 999px;
   z-index: 2;
   backdrop-filter: blur(6px);
@@ -403,10 +402,9 @@ h1 { font-size: clamp(2.2rem, 5.4vw, 4.2rem); line-height: 0.92; max-width: 9ch;
 
 @media (max-width: 640px) {
   .shell { width: min(100% - 20px, 100%); padding-top: 14px; }
-  .hero, .panel, .inner { padding: 16px; }
+  .hero, .panel, .inner { padding: 12px; }
   .dashboard-top { flex-direction: column; align-items: flex-start; }
-  .places-card { min-height: auto; }
-  .map-panel { min-height: 420px; }
+  .map-panel { min-height: 72vh; height: 72vh; }
 }
 
 .compact-status {
