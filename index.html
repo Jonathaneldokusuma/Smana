@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Ambulance Navigation</title>
+    <meta
+      name="description"
+      content="AI-assisted ambulance routing, traffic prioritization, and hospital coordination for emergency response."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+    <div class="noise"></div>
+
+    <main class="shell">
+      <section class="hero card">
+        <div class="hero-copy">
+          <p class="eyebrow">Hackathon prototype</p>
+          <h1>Smart Ambulance Navigation</h1>
+          <p class="lede">
+            AI-assisted routing that clears the fastest path, prioritizes traffic signals,
+            and keeps hospitals updated with live ETA and patient status.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn primary" id="rerouteBtn">Recalculate fastest route</button>
+            <button class="btn secondary" id="alertBtn">Trigger emergency signal</button>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat">
+              <span>ETA to hospital</span>
+              <strong id="etaValue">08 min 42 sec</strong>
+            </div>
+            <div class="stat">
+              <span>Traffic override</span>
+              <strong id="priorityValue">Active</strong>
+            </div>
+            <div class="stat">
+              <span>Route confidence</span>
+              <strong id="confidenceValue">96%</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard card inner">
+          <div class="dashboard-top">
+            <div>
+              <p class="section-label">Live operations</p>
+              <h2>Ambulance 12A</h2>
+            </div>
+            <span class="pill pulse">Priority routing</span>
+          </div>
+
+          <div class="map-panel">
+            <div class="map-grid"></div>
+            <svg viewBox="0 0 640 420" class="route-svg" aria-hidden="true">
+              <path id="routePath" d="M 78 336 C 130 280, 166 246, 220 220 S 326 158, 392 156 S 510 130, 570 88" />
+              <path id="altRoutePath" d="M 78 336 C 160 320, 190 290, 232 240 S 326 196, 410 198 S 502 176, 570 118" />
+            </svg>
+            <div class="node ambulance" id="ambulanceNode" style="left: 11%; top: 79%">A</div>
+            <div class="node incident" style="left: 44%; top: 53%">!</div>
+            <div class="node hospital" style="left: 89%; top: 18%">H</div>
+            <div class="node control" style="left: 78%; top: 58%">T</div>
+          </div>
+
+          <div class="dashboard-meta">
+            <div>
+              <span class="meta-label">Destination</span>
+              <strong>City General Trauma Center</strong>
+            </div>
+            <div>
+              <span class="meta-label">Road status</span>
+              <strong id="roadStatus">3 blocked intersections cleared</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid-two">
+        <article class="card panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Route engine</p>
+              <h3>AI decisions in one place</h3>
+            </div>
+            <span class="pill subtle">Fog + cloud aware</span>
+          </div>
+
+          <div class="flow">
+            <div class="flow-item">
+              <strong>1. Detect</strong>
+              <span>Ambulance GPS, siren signal, and nearby congestion</span>
+            </div>
+            <div class="flow-item">
+              <strong>2. Score</strong>
+              <span>Route candidates ranked by delay, safety, and distance</span>
+            </div>
+            <div class="flow-item">
+              <strong>3. Act</strong>
+              <span>Traffic lights and hospitals receive a live priority update</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card panel">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">Incident board</p>
+              <h3>Live blockers</h3>
+            </div>
+            <span class="pill danger" id="incidentCount">4 active</span>
+          </div>
+
+          <div class="incident-list" id="incidentList">
+            <div class="incident-row critical">
+              <span>Accident at Central Ave</span>
+              <small>Lane 2 closed</small>
+            </div>
+            <div class="incident-row warning">
+              <span>Roadwork on Market Street</span>
+              <small>Speed reduced</small>
+            </div>
+            <div class="incident-row info">
+              <span>Traffic lights synced</span>
+              <small>Green corridor active</small>
+            </div>
+            <div class="incident-row info">
+              <span>Hospital prep alert sent</span>
+              <small>ER team ready</small>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid-three">
+        <article class="card panel small">
+          <p class="section-label">Patient status</p>
+          <h3>Critical but stable</h3>
+          <p class="body-copy">Vitals stream to the hospital before arrival so triage starts immediately.</p>
+        </article>
+        <article class="card panel small">
+          <p class="section-label">Dispatch center</p>
+          <h3>Nearby unit assigned</h3>
+          <p class="body-copy">Nearest ambulance selected with least route friction and shortest response time.</p>
+        </article>
+        <article class="card panel small">
+          <p class="section-label">Impact</p>
+          <h3>3.5 min saved</h3>
+          <p class="body-copy">Compared with a normal route, the corridor reduces delay in peak traffic.</p>
+        </article>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
