@@ -2,6 +2,10 @@ const centerBtn = document.getElementById('centerBtn');
 const locBtn = document.getElementById('locBtn');
 const caseBtn = document.getElementById('caseBtn');
 const callBtn = document.getElementById('callBtn');
+const callModal = document.getElementById('callModal');
+const callCloseBtn = document.getElementById('callCloseBtn');
+const callPhoneBtn = document.getElementById('callPhoneBtn');
+const callWhatsAppBtn = document.getElementById('callWhatsAppBtn');
 const zoomInBtn = document.getElementById('zoomInBtn');
 const zoomOutBtn = document.getElementById('zoomOutBtn');
 const statusPill = document.getElementById('statusPill');
@@ -53,6 +57,8 @@ const fallbackCenter = [-7.5566, 110.8205];
 function setStatus(text) { statusPill.textContent = text; }
 function showError(text) { geoError.textContent = text; geoError.hidden = false; }
 function hideError() { geoError.hidden = true; geoError.textContent = ''; }
+function openCallModal() { callModal.hidden = false; }
+function closeCallModal() { callModal.hidden = true; }
 
 function createPin(label, className) {
   return L.divIcon({
@@ -226,10 +232,28 @@ caseModal.addEventListener('click', (e) => { if (e.target === caseModal) caseMod
 zoomInBtn.addEventListener('click', () => map.zoomIn());
 zoomOutBtn.addEventListener('click', () => map.zoomOut());
 callBtn.addEventListener('click', () => {
-  const confirmCall = confirm('Panggil ambulans sekarang? Untuk demo, tombol ini bisa diarahkan ke 119 atau WhatsApp/telepon rumah sakit.');
-  if (!confirmCall) return;
-  setStatus('Mempersiapkan panggilan ambulans...');
+  setStatus('Pilih metode panggilan');
+  openCallModal();
+});
+callCloseBtn.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  closeCallModal();
+});
+callModal.addEventListener('click', (event) => {
+  if (event.target === callModal) closeCallModal();
+});
+callPhoneBtn.addEventListener('click', () => {
+  setStatus('Mempersiapkan panggilan telepon...');
+  closeCallModal();
   window.location.href = 'tel:119';
+});
+callWhatsAppBtn.addEventListener('click', () => {
+  const phone = '6281234567890';
+  const message = encodeURIComponent('Halo, saya butuh ambulans. Mohon kirim bantuan ke lokasi saya sekarang.');
+  setStatus('Membuka WhatsApp ambulans...');
+  closeCallModal();
+  window.open(`https://wa.me/${phone}?text=${message}`, '_blank', 'noopener,noreferrer');
 });
 
 renderCases();

@@ -33,6 +33,23 @@
         <span class="hud-pill" id="statusPill">Mencari lokasi...</span>
       </div>
       <div class="geo-error" id="geoError" hidden></div>
+      <div class="call-modal" id="callModal" hidden>
+        <div class="call-card" role="dialog" aria-modal="true" aria-labelledby="callTitle">
+          <div class="call-head">
+            <div>
+              <p class="eyebrow">Tanggap darurat</p>
+              <h2 id="callTitle">Panggil ambulans?</h2>
+            </div>
+            <button class="call-close" id="callCloseBtn" aria-label="Tutup">&times;</button>
+          </div>
+          <p class="call-copy">Pilih cara panggilan untuk demo atau operasional nyata.</p>
+          <div class="call-actions">
+            <button class="call-action call-action-primary" id="callPhoneBtn">Telepon 119</button>
+            <button class="call-action" id="callWhatsAppBtn">WhatsApp ambulans</button>
+          </div>
+          <p class="call-note">Untuk produksi, nomor WhatsApp dan hotline bisa diganti ke kontak rumah sakit atau server dispatch.</p>
+        </div>
+      </div>
       <div class="case-modal" id="caseModal" hidden>
         <div class="case-card" role="dialog" aria-modal="true" aria-labelledby="caseTitle">
           <div class="case-head">
