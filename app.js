@@ -1,6 +1,7 @@
 const centerBtn = document.getElementById('centerBtn');
 const locBtn = document.getElementById('locBtn');
 const caseBtn = document.getElementById('caseBtn');
+const callBtn = document.getElementById('callBtn');
 const zoomInBtn = document.getElementById('zoomInBtn');
 const zoomOutBtn = document.getElementById('zoomOutBtn');
 const statusPill = document.getElementById('statusPill');
@@ -185,8 +186,8 @@ function initMap() {
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
-  ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('AMB', 'map-pin-ambulance') }).addTo(map);
-  hospitalMarker = L.marker(soloHospitals[0].latlng, { icon: createPin('RS', 'map-pin-hospital') }).addTo(map);
+  ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('🚑', 'map-pin-ambulance') }).addTo(map);
+  hospitalMarker = L.marker(soloHospitals[0].latlng, { icon: createPin('H', 'map-pin-hospital') }).addTo(map);
   userHalo = L.marker(fallbackCenter, {
     icon: L.divIcon({ className: 'current-ring', iconSize: [40, 40], iconAnchor: [20, 20] }),
     interactive: false,
@@ -224,6 +225,12 @@ caseCloseBtn.addEventListener('click', (event) => {
 caseModal.addEventListener('click', (e) => { if (e.target === caseModal) caseModal.hidden = true; });
 zoomInBtn.addEventListener('click', () => map.zoomIn());
 zoomOutBtn.addEventListener('click', () => map.zoomOut());
+callBtn.addEventListener('click', () => {
+  const confirmCall = confirm('Panggil ambulans sekarang? Untuk demo, tombol ini bisa diarahkan ke 119 atau WhatsApp/telepon rumah sakit.');
+  if (!confirmCall) return;
+  setStatus('Mempersiapkan panggilan ambulans...');
+  window.location.href = 'tel:119';
+});
 
 renderCases();
 initMap();

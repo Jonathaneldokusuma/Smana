@@ -90,6 +90,15 @@ body {
   background: rgba(255,255,255,0.12);
 }
 
+.hud-btn-accent {
+  background: rgba(79, 227, 185, 0.16);
+  border: 1px solid rgba(79, 227, 185, 0.22);
+}
+
+.hud-btn-accent:hover {
+  background: rgba(79, 227, 185, 0.22);
+}
+
 .hud-pill {
   font-size: 0.85rem;
   color: var(--muted);
@@ -233,23 +242,26 @@ body {
 }
 
 .map-pin-ambulance span {
-  background: linear-gradient(135deg, #effcff, #c8f0ff);
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #dff6ff, #a8e4ff);
+  color: #0b2b3a;
+  font-size: 1.02rem;
+  box-shadow: 0 0 0 8px rgba(89, 183, 255, 0.14);
 }
 
 .map-pin-hospital span {
-  background: linear-gradient(135deg, #9df9de, #67e9c0);
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #ff7b7b, #e53935);
+  color: #ffffff;
+  font-size: 1.02rem;
+  box-shadow: 0 0 0 8px rgba(229, 57, 53, 0.14);
 }
 
-.map-pin-incident span {
-  background: linear-gradient(135deg, #ffcf87, #ff9e5f);
-}
-
-.map-pin-ambulance span {
-  box-shadow: 0 0 0 8px rgba(79, 227, 185, 0.12);
-}
-
+.map-pin-ambulance span,
 .map-pin-hospital span {
-  box-shadow: 0 0 0 8px rgba(103, 233, 192, 0.12);
+  border-radius: 50%;
 }
 
 .current-dot {
