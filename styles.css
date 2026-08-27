@@ -107,8 +107,112 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 }
 .map-stage {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 0.78fr 1.22fr;
   gap: 16px;
+}
+.places-card {
+  background: rgba(11, 18, 30, 0.95);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 18px;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: inset 0 0 0 1px rgba(104,166,255,0.04);
+}
+.place-hero {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.place-badge {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #baf7ff, #6ed7ff);
+  color: #07111f;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 18px 30px rgba(110, 215, 255, 0.18);
+}
+.place-hero h3 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+.place-hero p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+.place-tabs {
+  display: flex;
+  gap: 10px;
+}
+.place-tab {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  font-size: 0.86rem;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.place-tab.active {
+  color: #06131d;
+  background: linear-gradient(135deg, #c8f0ff, #baf7ff);
+  border-color: transparent;
+}
+.action-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.action-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 10px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.action-btn.primary {
+  color: #04131a;
+  background: linear-gradient(135deg, var(--accent), #90ffd9);
+}
+.place-details {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+}
+.detail-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.detail-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(104,166,255,0.14);
+  font-size: 0.9rem;
+  flex: 0 0 auto;
+}
+.detail-item p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 .map-panel {
   position: relative;
@@ -171,12 +275,20 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 .road-cross { left: 44%; top: 10%; width: 18px; height: 80%; }
 .road-curve { left: 19%; top: 26%; width: 62%; height: 16px; transform: rotate(18deg); transform-origin: center; }
 .road-ring { left: 53%; top: 23%; width: 23%; height: 23%; border-radius: 30px; }
+.road-slab {
+  height: 14px;
+  opacity: 0.65;
+}
+.road-a { left: 15%; top: 34%; width: 28%; transform: rotate(22deg); }
+.road-b { left: 29%; top: 56%; width: 24%; transform: rotate(-14deg); }
+.road-c { left: 64%; top: 35%; width: 18%; transform: rotate(-48deg); }
+.road-d { left: 70%; top: 58%; width: 16%; transform: rotate(8deg); }
 .route-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 #routePath, #altRoutePath {
   fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 8; stroke-dasharray: 12 18;
 }
-#routePath { stroke: rgba(79, 227, 185, 0.88); filter: drop-shadow(0 0 10px rgba(79, 227, 185, 0.35)); }
-#altRoutePath { stroke: rgba(104, 166, 255, 0.25); }
+#routePath { stroke: rgba(79, 227, 185, 0.95); filter: drop-shadow(0 0 12px rgba(79, 227, 185, 0.45)); }
+#altRoutePath { stroke: rgba(104, 166, 255, 0.16); }
 .node {
   position: absolute; width: 42px; height: 42px; border-radius: 50%;
   display: grid; place-items: center; font-weight: 800; color: #07111f; transform: translate(-50%, -50%);
@@ -187,7 +299,7 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   text-align: center;
   padding: 4px;
 }
-.ambulance { background: linear-gradient(135deg, #f4fbff, #c8f0ff); box-shadow: 0 18px 40px rgba(0,0,0,0.35), 0 0 0 10px rgba(193, 235, 255, 0.08); }
+.ambulance { background: linear-gradient(135deg, #f4fbff, #c8f0ff); box-shadow: 0 18px 40px rgba(0,0,0,0.35), 0 0 0 12px rgba(193, 235, 255, 0.08); }
 .incident { background: linear-gradient(135deg, #ffcf87, #ff9e5f); }
 .hospital { background: linear-gradient(135deg, #9df9de, #67e9c0); }
 .control { background: linear-gradient(135deg, #88a9ff, #5f8cff); }
@@ -313,5 +425,6 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   .hero, .panel, .inner { padding: 18px; }
   .dashboard-top, .panel-head, .dashboard-meta { flex-direction: column; align-items: flex-start; }
   .pitch-head { flex-direction: column; align-items: flex-start; }
+  .places-card { min-height: auto; }
   .map-panel { min-height: 420px; }
 }

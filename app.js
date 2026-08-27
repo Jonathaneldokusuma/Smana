@@ -14,7 +14,7 @@ const routes = [
   {
     eta: '08 menit 42 detik',
     confidence: '96%',
-    status: 'Koridor utama aktif di jalur tengah kota',
+    status: 'Koridor utama aktif menuju RSUD Sentra Trauma',
     altOpacity: 0.25,
     routeDash: '12 18',
     position: { left: '10%', top: '78%' },
@@ -22,7 +22,7 @@ const routes = [
   {
     eta: '06 menit 18 detik',
     confidence: '98%',
-    status: 'Koridor hijau tersambung ke kawasan medis',
+    status: 'Koridor hijau tersambung ke area IGD',
     altOpacity: 0.16,
     routeDash: '10 14',
     position: { left: '22%', top: '69%' },
@@ -30,7 +30,7 @@ const routes = [
   {
     eta: '05 menit 54 detik',
     confidence: '99%',
-    status: 'Prioritas lampu lalu lintas diperbarui di Jl. utama',
+    status: 'Prioritas lampu lalu lintas diperbarui di jalur utama',
     altOpacity: 0.10,
     routeDash: '8 12',
     position: { left: '33%', top: '58%' },
@@ -68,7 +68,7 @@ rerouteBtn.addEventListener('click', () => applyRoute(true));
 alertBtn.addEventListener('click', () => {
   priorityValue.textContent = 'Darurat';
   roadStatus.textContent = 'Perintah prioritas jalur darurat dikirim';
-  routePath.style.stroke = 'rgba(79, 227, 185, 1)';
+  routePath.style.stroke = 'rgba(145, 250, 208, 1)';
   setTimeout(() => applyRoute(false), 1200);
 });
 
