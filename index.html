@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Ambulance Navigation</title>
+    <title>Navigasi Ambulans Cerdas</title>
     <meta
       name="description"
-      content="AI-assisted ambulance routing, traffic prioritization, and hospital coordination for emergency response."
+      content="Navigasi ambulans, prioritas lampu lalu lintas, dan koordinasi rumah sakit untuk respons darurat."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,29 +24,29 @@
     <main class="shell">
       <section class="hero card">
         <div class="hero-copy">
-          <p class="eyebrow">Hackathon prototype</p>
-          <h1>Smart Ambulance Navigation</h1>
+          <p class="eyebrow">Prototipe hackathon</p>
+          <h1>Navigasi Ambulans Cerdas</h1>
           <p class="lede">
-            AI-assisted routing that clears the fastest path, prioritizes traffic signals,
-            and keeps hospitals updated with live ETA and patient status.
+            Sistem rute ambulans yang memilih jalur tercepat, memberi prioritas ke lampu lalu
+            lintas, dan mengirim pembaruan waktu tiba ke rumah sakit secara langsung.
           </p>
 
           <div class="hero-actions">
-            <button class="btn primary" id="rerouteBtn">Recalculate fastest route</button>
-            <button class="btn secondary" id="alertBtn">Trigger emergency signal</button>
+            <button class="btn primary" id="rerouteBtn">Hitung ulang rute tercepat</button>
+            <button class="btn secondary" id="alertBtn">Kirim sinyal darurat</button>
           </div>
 
           <div class="stats-grid">
             <div class="stat">
-              <span>ETA to hospital</span>
+              <span>Estimasi tiba</span>
               <strong id="etaValue">08 min 42 sec</strong>
             </div>
             <div class="stat">
-              <span>Traffic override</span>
+              <span>Prioritas lalu lintas</span>
               <strong id="priorityValue">Active</strong>
             </div>
             <div class="stat">
-              <span>Route confidence</span>
+              <span>Kepercayaan rute</span>
               <strong id="confidenceValue">96%</strong>
             </div>
           </div>
@@ -55,23 +55,30 @@
         <div class="dashboard card inner">
           <div class="dashboard-top">
             <div>
-              <p class="section-label">Live operations</p>
-              <h2>Metro corridor view</h2>
+              <p class="section-label">Operasi langsung</p>
+              <h2>Tampilan koridor kota</h2>
             </div>
-            <span class="pill pulse">Priority routing</span>
+            <span class="pill pulse">Rute prioritas</span>
           </div>
 
           <div class="map-stage">
             <div class="map-panel">
               <div class="map-grid"></div>
-              <div class="district-label north">North Gate</div>
-              <div class="district-label center">Central District</div>
-              <div class="district-label south">Trauma Corridor</div>
+              <div class="district-label north">RSUD Utara</div>
+              <div class="district-label center">Pasar Baru</div>
+              <div class="district-label south">Koridor Trauma</div>
+              <div class="district-label west">Stasiun Barat</div>
+              <div class="district-label east">Kawasan Medis</div>
 
               <div class="road road-main"></div>
               <div class="road road-cross"></div>
               <div class="road road-curve"></div>
               <div class="road road-ring"></div>
+              <div class="road road-river"></div>
+              <div class="road road-bypass"></div>
+              <div class="landmark park"></div>
+              <div class="landmark market"></div>
+              <div class="landmark station"></div>
 
               <svg viewBox="0 0 640 420" class="route-svg" aria-hidden="true">
                 <path id="routePath" d="M 68 334 C 116 318, 164 294, 214 250 S 316 178, 384 164 S 482 140, 570 86" />
@@ -82,13 +89,13 @@
                 <span>AMB</span>
               </div>
               <div class="node incident hazard" style="left: 39%; top: 59%">
-                <span>ACC</span>
+                <span>KAC</span>
               </div>
               <div class="node signal" style="left: 58%; top: 43%">
                 <span>TL</span>
               </div>
               <div class="node hospital" style="left: 90%; top: 20%">
-                <span>ER</span>
+                <span>IGD</span>
               </div>
               <div class="node control" style="left: 76%; top: 62%">
                 <span>DSP</span>
@@ -97,23 +104,23 @@
 
             <aside class="route-panel">
               <div class="route-card accent">
-                <span class="route-label">Destination</span>
-                <strong>City General Trauma Center</strong>
-                <small>3.8 km from current position</small>
+                <span class="route-label">Tujuan</span>
+                <strong>RSUD Sentra Trauma</strong>
+                <small>3,8 km dari posisi saat ini</small>
               </div>
               <div class="route-card">
-                <span class="route-label">Road status</span>
-                <strong id="roadStatus">3 blocked intersections cleared</strong>
-                <small>Green corridor is active</small>
+                <span class="route-label">Status jalan</span>
+                <strong id="roadStatus">3 persimpangan macet sudah dibuka</strong>
+                <small>Koridor hijau aktif</small>
               </div>
               <div class="route-card compact">
-                <span class="route-label">Predicted arrival</span>
+                <span class="route-label">Prediksi tiba</span>
                 <strong id="etaMini">08 min 42 sec</strong>
               </div>
               <div class="route-chip-row">
-                <span class="route-chip active">Fastest</span>
-                <span class="route-chip">Safer alt</span>
-                <span class="route-chip">Lowest risk</span>
+                <span class="route-chip active">Tercepat</span>
+                <span class="route-chip">Alternatif aman</span>
+                <span class="route-chip">Risiko rendah</span>
               </div>
             </aside>
           </div>
@@ -124,24 +131,24 @@
         <article class="card panel">
           <div class="panel-head">
             <div>
-              <p class="section-label">Route engine</p>
-              <h3>AI decisions in one place</h3>
+              <p class="section-label">Mesin rute</p>
+              <h3>Semua keputusan dalam satu tampilan</h3>
             </div>
-            <span class="pill subtle">Fog + cloud aware</span>
+            <span class="pill subtle">GPS + lalu lintas</span>
           </div>
 
           <div class="flow">
             <div class="flow-item">
-              <strong>1. Detect</strong>
-              <span>Ambulance GPS, siren signal, and nearby congestion</span>
+              <strong>1. Deteksi</strong>
+              <span>GPS ambulans, sinyal sirene, dan kepadatan sekitar</span>
             </div>
             <div class="flow-item">
-              <strong>2. Score</strong>
-              <span>Route candidates ranked by delay, safety, and distance</span>
+              <strong>2. Nilai</strong>
+              <span>Calon rute diurutkan berdasarkan waktu, jarak, dan keamanan</span>
             </div>
             <div class="flow-item">
-              <strong>3. Act</strong>
-              <span>Traffic lights and hospitals receive a live priority update</span>
+              <strong>3. Tindak</strong>
+              <span>Lampu lalu lintas dan rumah sakit menerima pembaruan langsung</span>
             </div>
           </div>
         </article>
@@ -149,28 +156,28 @@
         <article class="card panel">
           <div class="panel-head">
             <div>
-              <p class="section-label">Incident board</p>
-              <h3>Live blockers</h3>
+              <p class="section-label">Papan insiden</p>
+              <h3>Hambatan aktif</h3>
             </div>
-            <span class="pill danger" id="incidentCount">4 active</span>
+            <span class="pill danger" id="incidentCount">4 aktif</span>
           </div>
 
           <div class="incident-list" id="incidentList">
             <div class="incident-row critical">
-              <span>Accident at Central Ave</span>
-              <small>Lane 2 closed</small>
+              <span>Kecelakaan di Jl. Merdeka</span>
+              <small>Lajur 2 ditutup</small>
             </div>
             <div class="incident-row warning">
-              <span>Roadwork on Market Street</span>
-              <small>Speed reduced</small>
+              <span>Perbaikan jalan di Jl. Sudirman</span>
+              <small>Kecepatan dikurangi</small>
             </div>
             <div class="incident-row info">
-              <span>Traffic lights synced</span>
-              <small>Green corridor active</small>
+              <span>Lampu lalu lintas tersinkron</span>
+              <small>Koridor hijau aktif</small>
             </div>
             <div class="incident-row info">
-              <span>Hospital prep alert sent</span>
-              <small>ER team ready</small>
+              <span>Notifikasi rumah sakit terkirim</span>
+              <small>Tim IGD siap</small>
             </div>
           </div>
         </article>
@@ -178,19 +185,19 @@
 
       <section class="grid-three">
         <article class="card panel small">
-          <p class="section-label">Patient status</p>
-          <h3>Critical but stable</h3>
-          <p class="body-copy">Vitals stream to the hospital before arrival so triage starts immediately.</p>
+          <p class="section-label">Status pasien</p>
+          <h3>Kritis namun stabil</h3>
+          <p class="body-copy">Tanda vital dikirim ke rumah sakit sebelum tiba agar triase bisa dimulai lebih cepat.</p>
         </article>
         <article class="card panel small">
-          <p class="section-label">Dispatch center</p>
-          <h3>Nearby unit assigned</h3>
-          <p class="body-copy">Nearest ambulance selected with least route friction and shortest response time.</p>
+          <p class="section-label">Pusat dispat</p>
+          <h3>Unit terdekat dipilih</h3>
+          <p class="body-copy">Ambulans terdekat dipilih berdasarkan hambatan rute paling kecil dan waktu respons tercepat.</p>
         </article>
         <article class="card panel small">
-          <p class="section-label">Impact</p>
-          <h3>3.5 min saved</h3>
-          <p class="body-copy">Compared with a normal route, the corridor reduces delay in peak traffic.</p>
+          <p class="section-label">Dampak</p>
+          <h3>Hemat 3,5 menit</h3>
+          <p class="body-copy">Dibanding rute biasa, koridor ini mengurangi keterlambatan saat lalu lintas padat.</p>
         </article>
       </section>
 
@@ -198,34 +205,34 @@
         <div class="pitch-head">
           <div>
             <p class="section-label">Pitch deck</p>
-            <h2>Why this wins the demo</h2>
+            <h2>Kenapa demo ini menarik</h2>
           </div>
           <span class="pill subtle">60-second story</span>
         </div>
 
         <div class="pitch-grid">
           <article class="pitch-card">
-            <span class="pitch-kicker">Problem</span>
-            <h3>Ambulances lose time in traffic.</h3>
+            <span class="pitch-kicker">Masalah</span>
+            <h3>Ambulans sering terhambat macet.</h3>
             <p>
-              In emergencies, every minute matters. Drivers, dispatchers, and hospitals often work
-              with partial information, which causes avoidable delays.
+              Saat keadaan darurat, setiap menit sangat berharga. Pengemudi, petugas dispat,
+              dan rumah sakit sering bekerja dengan informasi yang belum lengkap.
             </p>
           </article>
           <article class="pitch-card">
-            <span class="pitch-kicker">Solution</span>
-            <h3>AI clears a live green corridor.</h3>
+            <span class="pitch-kicker">Solusi</span>
+            <h3>Mesin rute membuka koridor hijau.</h3>
             <p>
-              We combine GPS tracking, route scoring, signal prioritization, and hospital alerts
-              into one real-time operations screen.
+              Kami menggabungkan pelacakan GPS, penilaian rute, prioritas lampu lalu lintas, dan
+              notifikasi rumah sakit dalam satu layar operasi.
             </p>
           </article>
           <article class="pitch-card">
-            <span class="pitch-kicker">Impact</span>
-            <h3>Faster arrival, better prep.</h3>
+            <span class="pitch-kicker">Dampak</span>
+            <h3>Tiba lebih cepat, tim lebih siap.</h3>
             <p>
-              The dashboard shortens response time, helps traffic control react quickly, and gives
-              the ER time to prepare before arrival.
+              Dashboard ini memangkas waktu respons, membantu pengendali lalu lintas bergerak
+              cepat, dan memberi waktu bagi IGD untuk bersiap sebelum pasien tiba.
             </p>
           </article>
         </div>

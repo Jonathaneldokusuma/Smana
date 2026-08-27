@@ -133,6 +133,8 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 .north { left: 5%; top: 8%; }
 .center { left: 36%; top: 31%; }
 .south { left: 58%; top: 72%; }
+.west { left: 10%; top: 53%; }
+.east { left: 73%; top: 19%; }
 .road {
   position: absolute;
   background: linear-gradient(180deg, rgba(181, 202, 224, 0.22), rgba(181, 202, 224, 0.06));
@@ -144,6 +146,51 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 .road-cross { left: 43%; top: 12%; width: 18px; height: 76%; }
 .road-curve { left: 18%; top: 22%; width: 64%; height: 16px; transform: rotate(19deg); transform-origin: center; }
 .road-ring { left: 59%; top: 28%; width: 20%; height: 20%; border-radius: 28px; }
+.road-river {
+  left: 18%;
+  top: 58%;
+  width: 38%;
+  height: 14px;
+  border-radius: 999px;
+  transform: rotate(-17deg);
+  background: linear-gradient(90deg, rgba(104, 166, 255, 0.14), rgba(104, 166, 255, 0.32), rgba(104, 166, 255, 0.14));
+}
+.road-bypass {
+  left: 52%;
+  top: 18%;
+  width: 32%;
+  height: 14px;
+  border-radius: 999px;
+  transform: rotate(35deg);
+  background: linear-gradient(90deg, rgba(181, 202, 224, 0.08), rgba(181, 202, 224, 0.18), rgba(181, 202, 224, 0.08));
+}
+.landmark {
+  position: absolute;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.1);
+  z-index: 1;
+}
+.park {
+  left: 14%;
+  top: 14%;
+  width: 16%;
+  height: 14%;
+  background: radial-gradient(circle at 30% 30%, rgba(79, 227, 185, 0.26), rgba(79, 227, 185, 0.12));
+}
+.market {
+  left: 31%;
+  top: 39%;
+  width: 12%;
+  height: 10%;
+  background: rgba(247, 200, 75, 0.12);
+}
+.station {
+  left: 68%;
+  top: 10%;
+  width: 15%;
+  height: 15%;
+  background: rgba(104, 166, 255, 0.14);
+}
 .route-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 #routePath, #altRoutePath {
   fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 8; stroke-dasharray: 12 18;

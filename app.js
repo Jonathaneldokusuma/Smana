@@ -12,25 +12,25 @@ const altRoutePath = document.getElementById('altRoutePath');
 
 const routes = [
   {
-    eta: '08 min 42 sec',
+    eta: '08 menit 42 detik',
     confidence: '96%',
-    status: '3 blocked intersections cleared',
+    status: '3 persimpangan macet sudah dibuka',
     altOpacity: 0.25,
     routeDash: '12 18',
     position: { left: '11%', top: '79%' },
   },
   {
-    eta: '06 min 18 sec',
+    eta: '06 menit 18 detik',
     confidence: '98%',
-    status: 'Green corridor extended to the trauma center',
+    status: 'Koridor hijau diperpanjang sampai RS tujuan',
     altOpacity: 0.16,
     routeDash: '10 14',
     position: { left: '21%', top: '69%' },
   },
   {
-    eta: '05 min 54 sec',
+    eta: '05 menit 54 detik',
     confidence: '99%',
-    status: 'Signal priorities updated for crossing junctions',
+    status: 'Prioritas lampu lalu lintas diperbarui di persimpangan',
     altOpacity: 0.10,
     routeDash: '8 12',
     position: { left: '32%', top: '58%' },
@@ -52,7 +52,7 @@ function applyRoute(next = false) {
   ambulanceNode.style.top = state.position.top;
   routePath.style.strokeDasharray = state.routeDash;
   altRoutePath.style.opacity = state.altOpacity;
-  incidentCount.textContent = `${4 - index} active`;
+  incidentCount.textContent = `${4 - index} aktif`;
 }
 
 function animateGps() {
@@ -66,8 +66,8 @@ function animateGps() {
 
 rerouteBtn.addEventListener('click', () => applyRoute(true));
 alertBtn.addEventListener('click', () => {
-  priorityValue.textContent = 'Emergency';
-  roadStatus.textContent = 'Traffic light override broadcast to intersections';
+  priorityValue.textContent = 'Darurat';
+  roadStatus.textContent = 'Perintah prioritas lampu lalu lintas dikirim';
   routePath.style.stroke = 'rgba(79, 227, 185, 1)';
   setTimeout(() => applyRoute(false), 1200);
 });
