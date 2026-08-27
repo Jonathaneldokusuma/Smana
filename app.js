@@ -216,7 +216,11 @@ centerBtn.addEventListener('click', () => {
 });
 locBtn.addEventListener('click', () => navigator.geolocation?.getCurrentPosition(setUserPosition, () => showError('Akses lokasi ditolak.'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }));
 caseBtn.addEventListener('click', () => { caseModal.hidden = false; });
-caseCloseBtn.addEventListener('click', () => { caseModal.hidden = true; });
+caseCloseBtn.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  caseModal.hidden = true;
+});
 caseModal.addEventListener('click', (e) => { if (e.target === caseModal) caseModal.hidden = true; });
 zoomInBtn.addEventListener('click', () => map.zoomIn());
 zoomOutBtn.addEventListener('click', () => map.zoomOut());
