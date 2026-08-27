@@ -14,26 +14,26 @@ const routes = [
   {
     eta: '08 menit 42 detik',
     confidence: '96%',
-    status: '3 persimpangan macet sudah dibuka',
+    status: 'Koridor utama aktif di jalur tengah kota',
     altOpacity: 0.25,
     routeDash: '12 18',
-    position: { left: '11%', top: '79%' },
+    position: { left: '10%', top: '78%' },
   },
   {
     eta: '06 menit 18 detik',
     confidence: '98%',
-    status: 'Koridor hijau diperpanjang sampai RS tujuan',
+    status: 'Koridor hijau tersambung ke kawasan medis',
     altOpacity: 0.16,
     routeDash: '10 14',
-    position: { left: '21%', top: '69%' },
+    position: { left: '22%', top: '69%' },
   },
   {
     eta: '05 menit 54 detik',
     confidence: '99%',
-    status: 'Prioritas lampu lalu lintas diperbarui di persimpangan',
+    status: 'Prioritas lampu lalu lintas diperbarui di Jl. utama',
     altOpacity: 0.10,
     routeDash: '8 12',
-    position: { left: '32%', top: '58%' },
+    position: { left: '33%', top: '58%' },
   },
 ];
 
@@ -67,7 +67,7 @@ function animateGps() {
 rerouteBtn.addEventListener('click', () => applyRoute(true));
 alertBtn.addEventListener('click', () => {
   priorityValue.textContent = 'Darurat';
-  roadStatus.textContent = 'Perintah prioritas lampu lalu lintas dikirim';
+  roadStatus.textContent = 'Perintah prioritas jalur darurat dikirim';
   routePath.style.stroke = 'rgba(79, 227, 185, 1)';
   setTimeout(() => applyRoute(false), 1200);
 });
