@@ -105,12 +105,45 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
     radial-gradient(circle at 20% 20%, rgba(79, 227, 185, 0.12), transparent 35%),
     linear-gradient(145deg, #07101d, #0c1728 58%, #0a1320);
 }
+.map-stage {
+  display: grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 16px;
+}
+.map-panel {
+  position: relative;
+  min-height: 390px;
+}
 .map-grid {
   position: absolute; inset: 0;
   background-image: linear-gradient(rgba(148,197,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148,197,255,0.08) 1px, transparent 1px);
   background-size: 44px 44px;
   opacity: 0.5;
 }
+.district-label {
+  position: absolute;
+  font-size: 0.74rem;
+  color: rgba(239, 246, 255, 0.72);
+  background: rgba(4, 12, 21, 0.6);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 7px 10px;
+  border-radius: 999px;
+  z-index: 2;
+}
+.north { left: 5%; top: 8%; }
+.center { left: 36%; top: 31%; }
+.south { left: 58%; top: 72%; }
+.road {
+  position: absolute;
+  background: linear-gradient(180deg, rgba(181, 202, 224, 0.22), rgba(181, 202, 224, 0.06));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 999px;
+  z-index: 1;
+}
+.road-main { left: 10%; top: 63%; width: 80%; height: 18px; }
+.road-cross { left: 43%; top: 12%; width: 18px; height: 76%; }
+.road-curve { left: 18%; top: 22%; width: 64%; height: 16px; transform: rotate(19deg); transform-origin: center; }
+.road-ring { left: 59%; top: 28%; width: 20%; height: 20%; border-radius: 28px; }
 .route-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 #routePath, #altRoutePath {
   fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 8; stroke-dasharray: 12 18;
@@ -121,11 +154,61 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   position: absolute; width: 42px; height: 42px; border-radius: 50%;
   display: grid; place-items: center; font-weight: 800; color: #07111f; transform: translate(-50%, -50%);
   box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  z-index: 3;
+  font-size: 0.7rem;
+  line-height: 1;
+  text-align: center;
+  padding: 4px;
 }
 .ambulance { background: linear-gradient(135deg, #fffcfb, #b8ecff); }
 .incident { background: linear-gradient(135deg, #ffcc6b, #ff7a59); }
 .hospital { background: linear-gradient(135deg, #9cffea, #4fe3b9); }
 .control { background: linear-gradient(135deg, #97b8ff, #688fff); }
+.signal { background: linear-gradient(135deg, #ffe6a6, #f7c84b); }
+.hazard { outline: 2px solid rgba(255, 107, 107, 0.32); }
+.node span { display: block; transform: scale(0.96); }
+
+.route-panel {
+  display: grid;
+  gap: 12px;
+  grid-auto-rows: min-content;
+}
+.route-card {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.route-card.accent {
+  background: linear-gradient(180deg, rgba(79, 227, 185, 0.14), rgba(255,255,255,0.04));
+}
+.route-label {
+  display: block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.route-card strong { display: block; font-size: 1.08rem; margin-bottom: 6px; }
+.route-card small { color: var(--muted); }
+.route-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.route-chip {
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.route-chip.active {
+  color: #04131a;
+  background: linear-gradient(135deg, var(--accent), #90ffd9);
+}
 
 .dashboard-meta { margin-top: 14px; padding: 2px 4px 0; }
 .dashboard-meta strong { display: block; margin-top: 5px; }
@@ -152,6 +235,7 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 
 @media (max-width: 980px) {
   .hero, .grid-two, .grid-three { grid-template-columns: 1fr; }
+  .map-stage { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr; }
   h1 { max-width: 12ch; }
 }

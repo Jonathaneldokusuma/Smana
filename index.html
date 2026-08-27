@@ -56,32 +56,66 @@
           <div class="dashboard-top">
             <div>
               <p class="section-label">Live operations</p>
-              <h2>Ambulance 12A</h2>
+              <h2>Metro corridor view</h2>
             </div>
             <span class="pill pulse">Priority routing</span>
           </div>
 
-          <div class="map-panel">
-            <div class="map-grid"></div>
-            <svg viewBox="0 0 640 420" class="route-svg" aria-hidden="true">
-              <path id="routePath" d="M 78 336 C 130 280, 166 246, 220 220 S 326 158, 392 156 S 510 130, 570 88" />
-              <path id="altRoutePath" d="M 78 336 C 160 320, 190 290, 232 240 S 326 196, 410 198 S 502 176, 570 118" />
-            </svg>
-            <div class="node ambulance" id="ambulanceNode" style="left: 11%; top: 79%">A</div>
-            <div class="node incident" style="left: 44%; top: 53%">!</div>
-            <div class="node hospital" style="left: 89%; top: 18%">H</div>
-            <div class="node control" style="left: 78%; top: 58%">T</div>
-          </div>
+          <div class="map-stage">
+            <div class="map-panel">
+              <div class="map-grid"></div>
+              <div class="district-label north">North Gate</div>
+              <div class="district-label center">Central District</div>
+              <div class="district-label south">Trauma Corridor</div>
 
-          <div class="dashboard-meta">
-            <div>
-              <span class="meta-label">Destination</span>
-              <strong>City General Trauma Center</strong>
+              <div class="road road-main"></div>
+              <div class="road road-cross"></div>
+              <div class="road road-curve"></div>
+              <div class="road road-ring"></div>
+
+              <svg viewBox="0 0 640 420" class="route-svg" aria-hidden="true">
+                <path id="routePath" d="M 68 334 C 116 318, 164 294, 214 250 S 316 178, 384 164 S 482 140, 570 86" />
+                <path id="altRoutePath" d="M 70 336 C 146 332, 190 306, 240 264 S 330 206, 420 202 S 506 176, 570 118" />
+              </svg>
+
+              <div class="node ambulance" id="ambulanceNode" style="left: 11%; top: 79%">
+                <span>AMB</span>
+              </div>
+              <div class="node incident hazard" style="left: 39%; top: 59%">
+                <span>ACC</span>
+              </div>
+              <div class="node signal" style="left: 58%; top: 43%">
+                <span>TL</span>
+              </div>
+              <div class="node hospital" style="left: 90%; top: 20%">
+                <span>ER</span>
+              </div>
+              <div class="node control" style="left: 76%; top: 62%">
+                <span>DSP</span>
+              </div>
             </div>
-            <div>
-              <span class="meta-label">Road status</span>
-              <strong id="roadStatus">3 blocked intersections cleared</strong>
-            </div>
+
+            <aside class="route-panel">
+              <div class="route-card accent">
+                <span class="route-label">Destination</span>
+                <strong>City General Trauma Center</strong>
+                <small>3.8 km from current position</small>
+              </div>
+              <div class="route-card">
+                <span class="route-label">Road status</span>
+                <strong id="roadStatus">3 blocked intersections cleared</strong>
+                <small>Green corridor is active</small>
+              </div>
+              <div class="route-card compact">
+                <span class="route-label">Predicted arrival</span>
+                <strong id="etaMini">08 min 42 sec</strong>
+              </div>
+              <div class="route-chip-row">
+                <span class="route-chip active">Fastest</span>
+                <span class="route-chip">Safer alt</span>
+                <span class="route-chip">Lowest risk</span>
+              </div>
+            </aside>
           </div>
         </div>
       </section>

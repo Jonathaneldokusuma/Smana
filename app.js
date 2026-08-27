@@ -4,6 +4,7 @@ const priorityValue = document.getElementById('priorityValue');
 const roadStatus = document.getElementById('roadStatus');
 const incidentCount = document.getElementById('incidentCount');
 const ambulanceNode = document.getElementById('ambulanceNode');
+const etaMini = document.getElementById('etaMini');
 const rerouteBtn = document.getElementById('rerouteBtn');
 const alertBtn = document.getElementById('alertBtn');
 const routePath = document.getElementById('routePath');
@@ -42,6 +43,7 @@ function applyRoute(next = false) {
   if (next) index = (index + 1) % routes.length;
   const state = routes[index];
   etaValue.textContent = state.eta;
+  etaMini.textContent = state.eta;
   confidenceValue.textContent = state.confidence;
   roadStatus.textContent = state.status;
   priorityValue.textContent = index === 0 ? 'Active' : 'Optimized';
