@@ -38,6 +38,7 @@ const routes = [
 ];
 
 let index = 0;
+let gpsPulse = 0;
 
 function applyRoute(next = false) {
   if (next) index = (index + 1) % routes.length;
@@ -54,6 +55,15 @@ function applyRoute(next = false) {
   incidentCount.textContent = `${4 - index} active`;
 }
 
+function animateGps() {
+  gpsPulse = (gpsPulse + 1) % 240;
+  const shimmer = 0.45 + Math.sin(gpsPulse / 18) * 0.18;
+  const glowSize = 18 + Math.sin(gpsPulse / 14) * 4;
+  ambulanceNode.style.boxShadow = `0 18px 40px rgba(0,0,0,0.35), 0 0 ${glowSize}px rgba(79, 227, 185, ${shimmer})`;
+  routePath.style.strokeDashoffset = `${-(gpsPulse * 0.9)}px`;
+  requestAnimationFrame(animateGps);
+}
+
 rerouteBtn.addEventListener('click', () => applyRoute(true));
 alertBtn.addEventListener('click', () => {
   priorityValue.textContent = 'Emergency';
@@ -63,3 +73,4 @@ alertBtn.addEventListener('click', () => {
 });
 
 applyRoute(false);
+requestAnimationFrame(animateGps);
