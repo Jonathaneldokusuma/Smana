@@ -3,7 +3,6 @@ const confidenceValue = document.getElementById('confidenceValue');
 const priorityValue = document.getElementById('priorityValue');
 const roadStatus = document.getElementById('roadStatus');
 const incidentCount = document.getElementById('incidentCount');
-const etaMini = document.getElementById('etaMini');
 const rerouteBtn = document.getElementById('rerouteBtn');
 const alertBtn = document.getElementById('alertBtn');
 
@@ -51,7 +50,6 @@ function updateRouteView(next = false) {
   if (next) index = (index + 1) % routes.length;
   const state = routes[index];
   etaValue.textContent = state.eta;
-  etaMini.textContent = state.eta;
   confidenceValue.textContent = state.confidence;
   roadStatus.textContent = state.status;
   priorityValue.textContent = state.priority;

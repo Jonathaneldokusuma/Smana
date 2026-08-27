@@ -54,8 +54,8 @@ body {
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: 28px;
-  padding: 28px;
+  gap: 24px;
+  padding: 26px;
 }
 .hero-copy { padding: 10px 6px 10px 4px; }
 .eyebrow, .section-label {
@@ -67,9 +67,9 @@ body {
   font-weight: 700;
 }
 h1, h2, h3 { font-family: Space Grotesk, Inter, sans-serif; margin: 0; }
-h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
+h1 { font-size: clamp(2.5rem, 6vw, 4.9rem); line-height: 0.93; max-width: 9ch; }
 .lede, .body-copy, .flow-item span, .meta-label, .incident-row small { color: var(--muted); }
-.lede { font-size: 1.06rem; line-height: 1.75; max-width: 60ch; margin: 18px 0 0; }
+.lede { font-size: 1.02rem; line-height: 1.7; max-width: 52ch; margin: 18px 0 0; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0; }
 .btn {
   border: 0; border-radius: 999px; padding: 14px 18px; font-weight: 700; font-size: 0.95rem;
@@ -83,7 +83,7 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
 }
 .stat {
-  padding: 18px; border-radius: 22px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .stat span, .meta-label { display: block; font-size: 0.85rem; margin-bottom: 8px; }
 .stat strong { font-size: 1.4rem; }
@@ -107,20 +107,20 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 }
 .map-stage {
   display: grid;
-  grid-template-columns: 0.58fr 1.42fr;
-  gap: 14px;
+  grid-template-columns: 0.48fr 1.52fr;
+  gap: 12px;
   align-items: stretch;
 }
 .places-card {
   background: rgba(11, 18, 30, 0.95);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 24px;
-  padding: 18px;
+  padding: 16px;
   min-height: 520px;
   max-height: 520px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   box-shadow: inset 0 0 0 1px rgba(104,166,255,0.04);
 }
 .place-hero {
@@ -131,8 +131,8 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .place-badge {
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 52px;
   border-radius: 18px;
   display: grid;
   place-items: center;
@@ -143,21 +143,21 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   box-shadow: 0 18px 30px rgba(110, 215, 255, 0.18);
 }
 .place-hero h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin-bottom: 4px;
 }
 .place-hero p {
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
 }
 .place-tabs {
   display: flex;
   gap: 10px;
 }
 .place-tab {
-  padding: 10px 14px;
+  padding: 9px 12px;
   border-radius: 999px;
   background: rgba(255,255,255,0.04);
   color: var(--muted);
@@ -177,11 +177,11 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 .action-btn {
   border: 0;
   border-radius: 999px;
-  padding: 12px 10px;
+  padding: 11px 10px;
   background: rgba(255,255,255,0.06);
   color: var(--text);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 .action-btn.primary {
   color: #04131a;
@@ -194,21 +194,21 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 }
 .detail-item {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: flex-start;
-  padding: 14px 12px;
+  padding: 12px 11px;
   border-radius: 18px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.06);
 }
 .detail-icon {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   background: rgba(104,166,255,0.14);
-  font-size: 0.9rem;
+  font-size: 0.72rem;
   flex: 0 0 auto;
 }
 .detail-item p {
@@ -287,11 +287,11 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 }
 .district-label {
   position: absolute;
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   color: rgba(239, 246, 255, 0.76);
   background: rgba(4, 12, 21, 0.68);
   border: 1px solid rgba(255,255,255,0.08);
-  padding: 8px 12px;
+  padding: 7px 11px;
   border-radius: 999px;
   z-index: 2;
   backdrop-filter: blur(6px);
@@ -304,10 +304,7 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 .east { left: 77%; top: 19%; }
 
 .route-panel {
-  display: grid;
-  gap: 12px;
-  grid-auto-rows: min-content;
-  align-content: start;
+  display: none;
 }
 .route-card {
   padding: 16px;
@@ -371,7 +368,7 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 
 .pitch {
   margin-top: 20px;
-  padding: 24px;
+  padding: 22px;
   background:
     linear-gradient(180deg, rgba(104, 166, 255, 0.09), rgba(255,255,255,0.02)),
     rgba(10, 20, 34, 0.82);
@@ -389,7 +386,7 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
 .pitch-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 .pitch-card {
   padding: 18px;
@@ -424,4 +421,16 @@ h1 { font-size: clamp(2.9rem, 7vw, 5.5rem); line-height: 0.94; max-width: 9ch; }
   .pitch-head { flex-direction: column; align-items: flex-start; }
   .places-card { min-height: auto; }
   .map-panel { min-height: 420px; }
+}
+
+.compact-status {
+  display: grid;
+  gap: 10px;
+  padding-top: 8px;
+  margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.compact-status strong {
+  font-size: 0.92rem;
+  line-height: 1.5;
 }
