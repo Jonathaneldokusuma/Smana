@@ -269,6 +269,11 @@ body {
   margin-top: 16px;
 }
 
+.filter-bar-secondary {
+  grid-template-columns: 1fr;
+  margin-top: 12px;
+}
+
 .filter-input,
 .filter-select {
   width: 100%;
@@ -342,6 +347,17 @@ body {
 .hospital-item-meta small {
   color: var(--muted);
   margin-top: 4px;
+}
+
+.hospital-item-main {
+  min-width: 0;
+}
+
+.hospital-item-main strong,
+.hospital-item-main span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .case-head {

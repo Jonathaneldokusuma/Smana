@@ -18,10 +18,22 @@ const filterModal = document.getElementById('filterModal');
 const filterCloseBtn = document.getElementById('filterCloseBtn');
 const hospitalSearch = document.getElementById('hospitalSearch');
 const conditionFilter = document.getElementById('conditionFilter');
+const regionFilter = document.getElementById('regionFilter');
 const hospitalList = document.getElementById('hospitalList');
 const filterSummary = document.getElementById('filterSummary');
 
 const overpassEndpoint = 'https://overpass-api.de/api/interpreter';
+const regionSuggestions = {
+  jakarta: { label: 'Jakarta', latlng: [-6.2088, 106.8456] },
+  bandung: { label: 'Bandung', latlng: [-6.9175, 107.6191] },
+  semarang: { label: 'Semarang', latlng: [-6.9667, 110.4167] },
+  surabaya: { label: 'Surabaya', latlng: [-7.2575, 112.7521] },
+  yogyakarta: { label: 'Yogyakarta', latlng: [-7.7956, 110.3695] },
+  solo: { label: 'Surakarta / Solo', latlng: [-7.5666, 110.8167] },
+  medan: { label: 'Medan', latlng: [3.5952, 98.6722] },
+  makassar: { label: 'Makassar', latlng: [-5.1477, 119.4327] },
+  denpasar: { label: 'Denpasar', latlng: [-8.6705, 115.2126] },
+};
 
 const patientCases = [
   { id: 'umum', label: 'Umum', hint: 'Keluhan umum, demam, lemas.' },
@@ -66,36 +78,13 @@ let facilityCacheKey = '';
 
 const fallbackCenter = [-7.5566, 110.8205];
 
-function setStatus(text) {
-  statusPill.textContent = text;
-}
-
-function showError(text) {
-  geoError.textContent = text;
-  geoError.hidden = false;
-}
-
-function hideError() {
-  geoError.hidden = true;
-  geoError.textContent = '';
-}
-
-function openCallModal() {
-  callModal.hidden = false;
-}
-
-function closeCallModal() {
-  callModal.hidden = true;
-}
-
-function openFilterModal() {
-  filterModal.hidden = false;
-  renderHospitalList();
-}
-
-function closeFilterModal() {
-  filterModal.hidden = true;
-}
+function setStatus(text) { statusPill.textContent = text; }
+function showError(text) { geoError.textContent = text; geoError.hidden = false; }
+function hideError() { geoError.hidden = true; geoError.textContent = ''; }
+function openCallModal() { callModal.hidden = false; }
+function closeCallModal() { callModal.hidden = true; }
+function openFilterModal() { filterModal.hidden = false; renderHospitalList(); }
+function closeFilterModal() { filterModal.hidden = true; }
 
 function getCurrentPosition() {
   return new Promise((resolve, reject) => {
@@ -132,6 +121,16 @@ function getConditionLabel(value) {
   }[value] || 'Semua kondisi';
 }
 
+function getRegionBase() {
+  const value = regionFilter.value;
+  if (value === 'auto') return lastPosition || fallbackCenter;
+  return regionSuggestions[value]?.latlng || (lastPosition || fallbackCenter);
+}
+
+function getRegionLabel() {
+  return regionFilter.value === 'auto' ? 'lokasi Anda' : (regionSuggestions[regionFilter.value]?.label || 'wilayah terpilih');
+}
+
 function renderCases() {
   caseGrid.innerHTML = '';
   patientCases.forEach((item) => {
@@ -142,7 +141,7 @@ function renderCases() {
     button.addEventListener('click', () => {
       activeCase = item.id;
       caseModal.hidden = true;
-      if (lastPosition) chooseHospital(lastPosition);
+      if (lastPosition) refreshFacilities(lastPosition);
       setStatus(`Kondisi dipilih: ${item.label}`);
     });
     caseGrid.appendChild(button);
@@ -160,6 +159,28 @@ function haversineKm(a, b) {
 
 function normalize(text = '') {
   return text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
+}
+
+function kmText(distance) {
+  if (!Number.isFinite(distance)) return '-';
+  return distance < 1 ? `${Math.round(distance * 1000)} m` : `${distance.toFixed(1)} km`;
+}
+
+function getFacilityType(facility) {
+  const tags = facility.tags || {};
+  const name = normalize(facility.name);
+  if (tags.amenity === 'hospital' || tags.healthcare === 'hospital' || name.includes('rs')) return 'RS';
+  if (name.includes('puskesmas') || tags.amenity === 'clinic' || tags.healthcare === 'clinic' || tags.healthcare === 'centre') return 'Puskesmas/Klinik';
+  if (tags.amenity === 'doctors') return 'Dokter';
+  return 'Fasilitas Medis';
+}
+
+function getFacilityLabel(facility) {
+  const type = getFacilityType(facility);
+  if (type === 'RS') return 'Rumah Sakit';
+  if (type === 'Puskesmas/Klinik') return normalize(facility.name).includes('puskesmas') ? 'Puskesmas' : 'Klinik';
+  if (type === 'Dokter') return 'Dokter';
+  return 'Fasilitas Medis';
 }
 
 function scoreHospital(hospital) {
@@ -195,17 +216,9 @@ function serviceMatchesCondition(tags = {}, name = '', condition = 'all') {
   const value = normalize(name);
   const services = normalize(`${tags.amenity || ''} ${tags.healthcare || ''} ${tags.emergency || ''}`);
   if (condition === 'igd') {
-    return (
-      services.includes('hospital') ||
-      services.includes('clinic') ||
-      services.includes('doctors') ||
-      value.includes('igd') ||
-      value.includes('emergency') ||
-      value.includes('rs') ||
-      value.includes('puskesmas')
-    );
+    return services.includes('hospital') || services.includes('clinic') || services.includes('doctors') || value.includes('igd') || value.includes('emergency') || value.includes('rs') || value.includes('puskesmas');
   }
-  if (condition === 'trauma') return value.includes('ortopedi') || value.includes('trauma') || value.includes('hospital') || services.includes('hospital');
+  if (condition === 'trauma') return value.includes('ortopedi') || value.includes('trauma') || services.includes('hospital');
   if (condition === 'jantung') return value.includes('jantung') || value.includes('cardio') || value.includes('heart');
   if (condition === 'anak') return value.includes('anak') || value.includes('ibu dan anak') || value.includes('rsia');
   if (condition === 'ibu') return value.includes('ibu') || value.includes('bersalin') || value.includes('maternity') || value.includes('obgyn');
@@ -260,7 +273,7 @@ out center tags;
 async function fetchFacilities(fromLatLng) {
   const [lat, lng] = fromLatLng;
   const radiusMeters = 12000;
-  const cacheKey = `${lat.toFixed(3)}:${lng.toFixed(3)}:${conditionFilter.value}:${hospitalSearch.value.trim().toLowerCase()}`;
+  const cacheKey = `${lat.toFixed(3)}:${lng.toFixed(3)}:${conditionFilter.value}:${regionFilter.value}:${hospitalSearch.value.trim().toLowerCase()}`;
   if (facilityCache.length && facilityCacheKey === cacheKey) return facilityCache;
 
   const response = await fetch(overpassEndpoint, {
@@ -276,12 +289,7 @@ async function fetchFacilities(fromLatLng) {
       const name = el.tags?.name || el.tags?.['name:en'] || el.tags?.operator || 'Fasilitas medis';
       const latlng = [el.lat ?? el.center?.lat, el.lon ?? el.center?.lon];
       if (latlng.some((value) => typeof value !== 'number')) return null;
-      return {
-        name,
-        latlng,
-        tags: el.tags || {},
-        source: 'overpass',
-      };
+      return { name, latlng, tags: el.tags || {}, source: 'overpass' };
     })
     .filter(Boolean);
 
@@ -293,7 +301,7 @@ async function fetchFacilities(fromLatLng) {
 function filteredHospitals(source = soloHospitals) {
   const query = normalize(hospitalSearch.value.trim());
   const condition = conditionFilter.value;
-  const base = lastPosition || fallbackCenter;
+  const base = getRegionBase();
 
   return source
     .filter((hospital) => {
@@ -312,19 +320,22 @@ function filteredHospitals(source = soloHospitals) {
 function renderHospitalMarkers() {
   hospitalMarkers.forEach((marker) => map.removeLayer(marker));
   hospitalMarkers = [];
-  filteredHospitals(soloHospitals).forEach((hospital) => {
+  filteredHospitals(facilityCache.length ? facilityCache : soloHospitals).slice(0, 25).forEach((hospital) => {
     const marker = L.marker(hospital.latlng, { icon: createPin('H', 'map-pin-hospital') }).addTo(map);
-    marker.bindPopup(`<strong>${hospital.name}</strong><br/>${(hospital.tags?.services || ['umum']).join(', ')}`);
+    marker.bindPopup(`
+      <strong>${hospital.name}</strong><br/>
+      ${getFacilityLabel(hospital)}<br/>
+      ${kmText(hospital.distance)} dari titik acuan
+    `);
     hospitalMarkers.push(marker);
   });
 }
 
 function renderHospitalList() {
-  const currentBase = lastPosition || fallbackCenter;
   const items = filteredHospitals(facilityCache.length ? facilityCache : soloHospitals);
   hospitalList.innerHTML = '';
   filterSummary.textContent = items.length
-    ? `Menampilkan ${items.length} fasilitas medis terdekat untuk ${getConditionLabel(conditionFilter.value)}.`
+    ? `Menampilkan ${items.length} fasilitas medis terdekat untuk ${getConditionLabel(conditionFilter.value)} di ${getRegionLabel()}.`
     : 'Tidak ada fasilitas medis yang cocok dengan filter ini.';
 
   items.forEach((hospital) => {
@@ -334,19 +345,19 @@ function renderHospitalList() {
     row.innerHTML = `
       <div class="hospital-item-main">
         <strong>${hospital.name}</strong>
-        <span>${hospital.source === 'overpass'
+        <span>${getFacilityLabel(hospital)} • ${hospital.source === 'overpass'
           ? [hospital.tags?.amenity, hospital.tags?.healthcare].filter(Boolean).join(' • ')
           : (hospital.tags?.services || ['umum']).join(' • ')}</span>
       </div>
       <div class="hospital-item-meta">
-        <b>${hospital.distance.toFixed(1)} km</b>
-        <small>${hospital.source === 'overpass' ? 'OSM' : 'Curated'}</small>
+        <b>${kmText(hospital.distance)}</b>
+        <small>${hospital.source === 'overpass' ? 'OpenStreetMap' : 'Curated'}</small>
       </div>
     `;
     row.addEventListener('click', () => {
       activeHospital = hospital;
       hospitalMarker.setLatLng(hospital.latlng);
-      drawRoute(currentBase, hospital.latlng, hospital.name);
+      drawRoute(getRegionBase(), hospital.latlng, hospital.name);
       closeFilterModal();
       setStatus(`Dipilih: ${hospital.name}`);
     });
@@ -356,18 +367,12 @@ function renderHospitalList() {
 
 function drawRoute(fromLatLng, toLatLng, hospitalName) {
   setStatus(`Mencari rute ke ${hospitalName}...`);
-  const waypoints = [
-    L.latLng(fromLatLng[0], fromLatLng[1]),
-    L.latLng(toLatLng[0], toLatLng[1]),
-  ];
+  const waypoints = [L.latLng(fromLatLng[0], fromLatLng[1]), L.latLng(toLatLng[0], toLatLng[1])];
 
   if (!routeControl) {
     routeControl = L.Routing.control({
       waypoints,
-      router: L.Routing.osrmv1({
-        serviceUrl: 'https://router.project-osrm.org/route/v1',
-        profile: 'driving',
-      }),
+      router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1', profile: 'driving' }),
       routeWhileDragging: false,
       draggableWaypoints: false,
       addWaypoints: false,
@@ -375,9 +380,7 @@ function drawRoute(fromLatLng, toLatLng, hospitalName) {
       fitSelectedRoutes: true,
       show: false,
       createMarker: () => null,
-      lineOptions: {
-        styles: [{ color: '#4fe3b9', opacity: 0.98, weight: 6 }],
-      },
+      lineOptions: { styles: [{ color: '#4fe3b9', opacity: 0.98, weight: 6 }] },
     })
       .on('routesfound', (event) => {
         const route = event.routes?.[0];
@@ -400,10 +403,7 @@ function drawRoute(fromLatLng, toLatLng, hospitalName) {
 
 function chooseHospital(fromLatLng) {
   const source = facilityCache.length ? facilityCache : soloHospitals;
-  const candidate =
-    filteredHospitals(source)
-      .filter((hospital) => serviceMatchesCondition(hospital.tags, hospital.name, activeCase))
-      .sort((a, b) => (b.score - a.score) || (a.distance - b.distance))[0] || nearestHospital(fromLatLng);
+  const candidate = filteredHospitals(source).filter((hospital) => serviceMatchesCondition(hospital.tags, hospital.name, activeCase))[0] || nearestHospital(fromLatLng);
   activeHospital = candidate;
   hospitalMarker.setLatLng(activeHospital.latlng);
   drawRoute(fromLatLng, activeHospital.latlng, activeHospital.name);
@@ -426,25 +426,19 @@ async function refreshFacilities(fromLatLng) {
   try {
     setStatus('Mencari fasilitas medis terdekat...');
     const facilities = await fetchFacilities(fromLatLng);
-    if (facilities.length) {
-      facilityCache = facilities;
-      facilityCacheKey = `${fromLatLng[0].toFixed(3)}:${fromLatLng[1].toFixed(3)}:${conditionFilter.value}:${hospitalSearch.value.trim().toLowerCase()}`;
-      renderHospitalMarkers();
-    }
+    facilityCache = facilities;
+    facilityCacheKey = `${fromLatLng[0].toFixed(3)}:${fromLatLng[1].toFixed(3)}:${conditionFilter.value}:${regionFilter.value}:${hospitalSearch.value.trim().toLowerCase()}`;
   } catch {
     facilityCache = [];
   } finally {
     chooseHospital(fromLatLng);
+    renderHospitalMarkers();
+    renderHospitalList();
   }
 }
 
 function initMap() {
-  map = L.map('map', {
-    zoomControl: false,
-    attributionControl: false,
-    scrollWheelZoom: true,
-  }).setView(fallbackCenter, 15);
-
+  map = L.map('map', { zoomControl: false, attributionControl: false, scrollWheelZoom: true }).setView(fallbackCenter, 15);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
   ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('🚑', 'map-pin-ambulance') }).addTo(map);
@@ -458,10 +452,7 @@ function initMap() {
     interactive: false,
   }).addTo(map);
 
-  map.on('dragstart', () => {
-    followUser = false;
-  });
-
+  map.on('dragstart', () => { followUser = false; });
   renderHospitalMarkers();
 }
 
@@ -485,48 +476,29 @@ centerBtn.addEventListener('click', () => {
   map.flyTo(lastPosition || fallbackCenter, Math.max(map.getZoom(), 15), { duration: 0.5 });
 });
 
-locBtn.addEventListener(
-  'click',
-  () =>
-    navigator.geolocation?.getCurrentPosition(
-      setUserPosition,
-      () => showError('Akses lokasi ditolak.'),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
-    ),
-);
+locBtn.addEventListener('click', () => navigator.geolocation?.getCurrentPosition(setUserPosition, () => showError('Akses lokasi ditolak.'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }));
 
-caseBtn.addEventListener('click', () => {
-  caseModal.hidden = false;
+caseBtn.addEventListener('click', () => { caseModal.hidden = false; });
+filterBtn.addEventListener('click', () => { openFilterModal(); });
+
+caseCloseBtn.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); caseModal.hidden = true; });
+caseModal.addEventListener('click', (e) => { if (e.target === caseModal) caseModal.hidden = true; });
+filterCloseBtn.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); closeFilterModal(); });
+filterModal.addEventListener('click', (e) => { if (e.target === filterModal) closeFilterModal(); });
+
+hospitalSearch.addEventListener('input', () => {
+  renderHospitalList();
+  renderHospitalMarkers();
 });
 
-filterBtn.addEventListener('click', () => {
-  openFilterModal();
-});
-
-caseCloseBtn.addEventListener('click', (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  caseModal.hidden = true;
-});
-
-caseModal.addEventListener('click', (e) => {
-  if (e.target === caseModal) caseModal.hidden = true;
-});
-
-filterCloseBtn.addEventListener('click', (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  closeFilterModal();
-});
-
-filterModal.addEventListener('click', (e) => {
-  if (e.target === filterModal) closeFilterModal();
-});
-
-hospitalSearch.addEventListener('input', renderHospitalList);
 conditionFilter.addEventListener('change', () => {
   renderHospitalList();
   if (lastPosition) refreshFacilities(lastPosition);
+});
+
+regionFilter.addEventListener('change', () => {
+  renderHospitalList();
+  if (lastPosition) refreshFacilities(getRegionBase());
 });
 
 zoomInBtn.addEventListener('click', () => map.zoomIn());
@@ -537,15 +509,8 @@ callBtn.addEventListener('click', () => {
   openCallModal();
 });
 
-callCloseBtn.addEventListener('click', (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  closeCallModal();
-});
-
-callModal.addEventListener('click', (event) => {
-  if (event.target === callModal) closeCallModal();
-});
+callCloseBtn.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); closeCallModal(); });
+callModal.addEventListener('click', (event) => { if (event.target === callModal) closeCallModal(); });
 
 callPhoneBtn.addEventListener('click', () => {
   setStatus('Mempersiapkan panggilan telepon...');
@@ -558,7 +523,6 @@ callWhatsAppBtn.addEventListener('click', () => {
   const baseMessage = 'Halo, saya butuh ambulans. Mohon kirim bantuan ke lokasi saya sekarang.';
   setStatus('Mempersiapkan WhatsApp ambulans...');
   closeCallModal();
-
   getCurrentPosition()
     .then((position) => {
       const { latitude, longitude } = position.coords;
