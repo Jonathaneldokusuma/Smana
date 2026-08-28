@@ -53,8 +53,8 @@ body {
 .zoom-stack {
   position: absolute;
   right: 16px;
-  bottom: 16px;
-  z-index: 1000;
+  bottom: 92px;
+  z-index: 1300;
   display: grid;
   gap: 10px;
 }
@@ -506,6 +506,10 @@ body {
   }
   .call-actions {
     grid-template-columns: 1fr;
+  }
+  .zoom-stack {
+    right: 12px;
+    bottom: 92px;
   }
   .filter-bar {
     grid-template-columns: 1fr;
