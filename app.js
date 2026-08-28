@@ -476,7 +476,37 @@ async function refreshFacilities(fromLatLng) {
 
 function initMap() {
   map = L.map('map', { zoomControl: false, attributionControl: false, scrollWheelZoom: true }).setView(fallbackCenter, 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+  const tileSources = [
+    {
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      options: { maxZoom: 19, subdomains: ['a', 'b', 'c'] },
+    },
+    {
+      url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+      options: { maxZoom: 20, subdomains: ['a', 'b', 'c', 'd'] },
+    },
+    {
+      url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      options: { maxZoom: 20, subdomains: ['a', 'b', 'c'] },
+    },
+  ];
+
+  tileSources.forEach((source, index) => {
+    const layer = L.tileLayer(source.url, source.options);
+    if (index === 0) {
+      layer.addTo(map);
+    }
+    layer.on('tileerror', () => {
+      if (map.hasLayer(layer)) {
+        map.removeLayer(layer);
+        const next = tileSources[index + 1];
+        if (next) {
+          L.tileLayer(next.url, next.options).addTo(map);
+        }
+      }
+    });
+  });
 
   ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('🚑', 'map-pin-ambulance') }).addTo(map);
   hospitalMarker = L.marker(soloHospitals[0].latlng, { icon: createPin('H', 'map-pin-hospital') }).addTo(map);

@@ -1,9 +1,11 @@
 :root {
-  --bg: #07111f;
-  --text: #eff6ff;
-  --muted: #9db0c7;
-  --accent: #4fe3b9;
-  --shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+  --bg: #02040a;
+  --panel: #0a0f18;
+  --panel-2: #0d1420;
+  --text: #f1f5f9;
+  --muted: #91a4bd;
+  --accent: #43e0b4;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.48);
 }
 
 * { box-sizing: border-box; }
@@ -15,9 +17,9 @@ html, body {
 body {
   font-family: Inter, system-ui, sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(79, 227, 185, 0.1), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(89, 183, 255, 0.1), transparent 26%),
-    linear-gradient(135deg, #040810, var(--bg) 42%, #091423 100%);
+    radial-gradient(circle at top left, rgba(67, 224, 180, 0.08), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(122, 184, 255, 0.08), transparent 26%),
+    linear-gradient(135deg, #000000, #060910 35%, #02040a 100%);
   color: var(--text);
   overflow: hidden;
 }
@@ -26,7 +28,7 @@ body {
   position: relative;
   width: 100vw;
   height: 100vh;
-  background: #0a1020;
+  background: #000000;
 }
 
 #map {
@@ -44,7 +46,7 @@ body {
   align-items: center;
   padding: 10px 12px;
   border-radius: 18px;
-  background: rgba(7, 13, 24, 0.82);
+  background: rgba(5, 8, 15, 0.92);
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px);
@@ -64,7 +66,7 @@ body {
   height: 48px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  background: rgba(7, 13, 24, 0.88);
+  background: rgba(5, 8, 15, 0.96);
   color: var(--text);
   font-size: 1.4rem;
   font-weight: 800;
@@ -78,7 +80,7 @@ body {
   border: 0;
   border-radius: 999px;
   padding: 10px 14px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
   color: var(--text);
   font-weight: 700;
   cursor: pointer;
@@ -87,16 +89,16 @@ body {
 
 .hud-btn:hover {
   transform: translateY(-1px);
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.1);
 }
 
 .hud-btn-accent {
-  background: rgba(79, 227, 185, 0.16);
-  border: 1px solid rgba(79, 227, 185, 0.22);
+  background: rgba(67, 224, 180, 0.14);
+  border: 1px solid rgba(67, 224, 180, 0.22);
 }
 
 .hud-btn-accent:hover {
-  background: rgba(79, 227, 185, 0.22);
+  background: rgba(67, 224, 180, 0.2);
 }
 
 .hud-pill {
@@ -113,8 +115,8 @@ body {
   max-width: min(420px, calc(100vw - 32px));
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(255, 107, 107, 0.14);
-  border: 1px solid rgba(255, 107, 107, 0.22);
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid rgba(255, 107, 107, 0.2);
   color: #ffd0d0;
   box-shadow: var(--shadow);
 }
@@ -169,7 +171,7 @@ body {
   width: min(540px, 100%);
   border-radius: 28px;
   padding: 22px;
-  background: linear-gradient(180deg, rgba(11, 20, 35, 0.98), rgba(8, 14, 26, 0.98));
+  background: linear-gradient(180deg, rgba(8, 12, 20, 0.98), rgba(4, 8, 14, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
 }
@@ -233,7 +235,7 @@ body {
   width: min(720px, 100%);
   border-radius: 28px;
   padding: 22px;
-  background: linear-gradient(180deg, rgba(11, 20, 35, 0.98), rgba(8, 14, 26, 0.98));
+  background: linear-gradient(180deg, rgba(8, 12, 20, 0.98), rgba(4, 8, 14, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
 }
@@ -245,7 +247,7 @@ body {
   overflow: auto;
   border-radius: 28px;
   padding: 22px;
-  background: linear-gradient(180deg, rgba(11, 20, 35, 0.98), rgba(8, 14, 26, 0.98));
+  background: linear-gradient(180deg, rgba(8, 12, 20, 0.98), rgba(4, 8, 14, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
 }
@@ -280,7 +282,7 @@ body {
   min-height: 48px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 0 14px;
   outline: none;
@@ -309,7 +311,7 @@ body {
   gap: 14px;
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.035);
   color: var(--text);
   border-radius: 18px;
   padding: 16px;
@@ -346,8 +348,8 @@ body {
   margin-bottom: 8px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(79, 227, 185, 0.12);
-  border: 1px solid rgba(79, 227, 185, 0.18);
+  background: rgba(67, 224, 180, 0.12);
+  border: 1px solid rgba(67, 224, 180, 0.18);
   color: var(--accent);
   font-size: 0.78rem;
   font-weight: 800;
@@ -483,7 +485,7 @@ body {
   background: linear-gradient(135deg, #dff6ff, #a8e4ff);
   color: #0b2b3a;
   font-size: 1.02rem;
-  box-shadow: 0 0 0 8px rgba(89, 183, 255, 0.14);
+  box-shadow: 0 0 0 8px rgba(122, 184, 255, 0.14);
 }
 
 .map-pin-hospital span {
@@ -506,19 +508,19 @@ body {
   border-radius: 50%;
   background: #59b7ff;
   border: 3px solid rgba(255,255,255,0.95);
-  box-shadow: 0 0 0 10px rgba(89, 183, 255, 0.18);
+  box-shadow: 0 0 0 10px rgba(122, 184, 255, 0.18);
 }
 
 .leaflet-container {
-  background: #08111d;
+  background: #000000;
 }
 
 .current-ring {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 2px solid rgba(89, 183, 255, 0.3);
-  box-shadow: 0 0 0 10px rgba(89, 183, 255, 0.08);
+  border: 2px solid rgba(122, 184, 255, 0.28);
+  box-shadow: 0 0 0 10px rgba(122, 184, 255, 0.08);
   animation: pulse 1.8s ease-in-out infinite;
 }
 
