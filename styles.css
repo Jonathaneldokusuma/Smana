@@ -339,6 +339,21 @@ body {
   min-width: 92px;
 }
 
+.facility-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(79, 227, 185, 0.12);
+  border: 1px solid rgba(79, 227, 185, 0.18);
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
 .hospital-item-meta b,
 .hospital-item-meta small {
   display: block;
@@ -358,6 +373,11 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.hospital-item-main span {
+  display: block;
+  max-width: 100%;
 }
 
 .case-head {

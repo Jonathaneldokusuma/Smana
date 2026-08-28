@@ -381,11 +381,12 @@ function renderHospitalList() {
     row.innerHTML = `
       <div class="hospital-item-main">
         <strong>${hospital.name}</strong>
-        <span>${getFacilityLabel(hospital)} • ${hospital.source === 'overpass'
+        <span>${hospital.source === 'overpass'
           ? [hospital.tags?.amenity, hospital.tags?.healthcare].filter(Boolean).join(' • ')
           : (hospital.tags?.services || ['umum']).join(' • ')}</span>
       </div>
       <div class="hospital-item-meta">
+        <div class="facility-badge">${getFacilityLabel(hospital)}</div>
         <b>${kmText(hospital.distance)}</b>
         <small>${hospital.source === 'overpass' ? 'OpenStreetMap' : 'Curated'}</small>
       </div>
