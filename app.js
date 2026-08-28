@@ -21,6 +21,8 @@ const conditionFilter = document.getElementById('conditionFilter');
 const hospitalList = document.getElementById('hospitalList');
 const filterSummary = document.getElementById('filterSummary');
 
+const overpassEndpoint = 'https://overpass-api.de/api/interpreter';
+
 const patientCases = [
   { id: 'umum', label: 'Umum', hint: 'Keluhan umum, demam, lemas.' },
   { id: 'trauma', label: 'Trauma', hint: 'Kecelakaan, luka berat, patah tulang.' },
@@ -59,6 +61,8 @@ let activeCase = 'igd';
 let activeHospital = soloHospitals[0];
 let followUser = true;
 let hospitalMarkers = [];
+let facilityCache = [];
+let facilityCacheKey = '';
 
 const fallbackCenter = [-7.5566, 110.8205];
 
@@ -116,6 +120,18 @@ function createPin(label, className) {
   });
 }
 
+function getConditionLabel(value) {
+  return {
+    all: 'Semua kondisi',
+    igd: 'IGD / Darurat',
+    trauma: 'Trauma',
+    jantung: 'Jantung',
+    anak: 'Anak',
+    ibu: 'Ibu & Bayi',
+    umum: 'Umum',
+  }[value] || 'Semua kondisi';
+}
+
 function renderCases() {
   caseGrid.innerHTML = '';
   patientCases.forEach((item) => {
@@ -158,6 +174,45 @@ function scoreHospital(hospital) {
   return score;
 }
 
+function facilityScore(facility) {
+  const name = normalize(facility.name);
+  const tags = facility.tags || {};
+  let score = 0;
+  if (tags.amenity === 'hospital') score += 8;
+  if (tags.amenity === 'clinic') score += 6;
+  if (tags.amenity === 'doctors') score += 4;
+  if (tags.healthcare === 'hospital') score += 8;
+  if (tags.healthcare === 'clinic' || tags.healthcare === 'centre') score += 6;
+  if (name.includes('rsud')) score += 3;
+  if (name.includes('puskesmas')) score += 4;
+  if (name.includes('igd') || name.includes('emergency')) score += 3;
+  if (tags.emergency === 'yes') score += 2;
+  return score;
+}
+
+function serviceMatchesCondition(tags = {}, name = '', condition = 'all') {
+  if (condition === 'all') return true;
+  const value = normalize(name);
+  const services = normalize(`${tags.amenity || ''} ${tags.healthcare || ''} ${tags.emergency || ''}`);
+  if (condition === 'igd') {
+    return (
+      services.includes('hospital') ||
+      services.includes('clinic') ||
+      services.includes('doctors') ||
+      value.includes('igd') ||
+      value.includes('emergency') ||
+      value.includes('rs') ||
+      value.includes('puskesmas')
+    );
+  }
+  if (condition === 'trauma') return value.includes('ortopedi') || value.includes('trauma') || value.includes('hospital') || services.includes('hospital');
+  if (condition === 'jantung') return value.includes('jantung') || value.includes('cardio') || value.includes('heart');
+  if (condition === 'anak') return value.includes('anak') || value.includes('ibu dan anak') || value.includes('rsia');
+  if (condition === 'ibu') return value.includes('ibu') || value.includes('bersalin') || value.includes('maternity') || value.includes('obgyn');
+  if (condition === 'umum') return true;
+  return true;
+}
+
 function matchesCondition(hospital, filterValue) {
   if (filterValue === 'all') return true;
   if (filterValue === 'igd') {
@@ -172,21 +227,84 @@ function nearestHospital(fromLatLng) {
     .sort((a, b) => (b.score - a.score) || (a.distance - b.distance))[0];
 }
 
-function filteredHospitals() {
+function buildOverpassQuery(lat, lng, radiusMeters) {
+  return `
+[out:json][timeout:25];
+(
+  node(around:${radiusMeters},${lat},${lng})[amenity=hospital];
+  way(around:${radiusMeters},${lat},${lng})[amenity=hospital];
+  relation(around:${radiusMeters},${lat},${lng})[amenity=hospital];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=hospital];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=hospital];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=hospital];
+  node(around:${radiusMeters},${lat},${lng})[amenity=clinic];
+  way(around:${radiusMeters},${lat},${lng})[amenity=clinic];
+  relation(around:${radiusMeters},${lat},${lng})[amenity=clinic];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=clinic];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=clinic];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=clinic];
+  node(around:${radiusMeters},${lat},${lng})[amenity=doctors];
+  way(around:${radiusMeters},${lat},${lng})[amenity=doctors];
+  relation(around:${radiusMeters},${lat},${lng})[amenity=doctors];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=centre];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=centre];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=centre];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=facility];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=facility];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=facility];
+);
+out center tags;
+`;
+}
+
+async function fetchFacilities(fromLatLng) {
+  const [lat, lng] = fromLatLng;
+  const radiusMeters = 12000;
+  const cacheKey = `${lat.toFixed(3)}:${lng.toFixed(3)}:${conditionFilter.value}:${hospitalSearch.value.trim().toLowerCase()}`;
+  if (facilityCache.length && facilityCacheKey === cacheKey) return facilityCache;
+
+  const response = await fetch(overpassEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: `data=${encodeURIComponent(buildOverpassQuery(lat, lng, radiusMeters))}`,
+  });
+  if (!response.ok) throw new Error(`Overpass error ${response.status}`);
+  const data = await response.json();
+
+  const facilities = (data.elements || [])
+    .map((el) => {
+      const name = el.tags?.name || el.tags?.['name:en'] || el.tags?.operator || 'Fasilitas medis';
+      const latlng = [el.lat ?? el.center?.lat, el.lon ?? el.center?.lon];
+      if (latlng.some((value) => typeof value !== 'number')) return null;
+      return {
+        name,
+        latlng,
+        tags: el.tags || {},
+        source: 'overpass',
+      };
+    })
+    .filter(Boolean);
+
+  facilityCache = facilities;
+  facilityCacheKey = cacheKey;
+  return facilities;
+}
+
+function filteredHospitals(source = soloHospitals) {
   const query = normalize(hospitalSearch.value.trim());
   const condition = conditionFilter.value;
   const base = lastPosition || fallbackCenter;
 
-  return soloHospitals
+  return source
     .filter((hospital) => {
       const nameMatch = !query || normalize(hospital.name).includes(query);
-      const conditionMatch = matchesCondition(hospital, condition);
+      const conditionMatch = matchesCondition(hospital, condition) && serviceMatchesCondition(hospital.tags, hospital.name, condition);
       return nameMatch && conditionMatch;
     })
     .map((hospital) => ({
       ...hospital,
       distance: haversineKm(base, hospital.latlng),
-      score: scoreHospital(hospital),
+      score: hospital.source === 'overpass' ? facilityScore(hospital) : scoreHospital(hospital),
     }))
     .sort((a, b) => a.distance - b.distance || b.score - a.score);
 }
@@ -194,7 +312,7 @@ function filteredHospitals() {
 function renderHospitalMarkers() {
   hospitalMarkers.forEach((marker) => map.removeLayer(marker));
   hospitalMarkers = [];
-  soloHospitals.forEach((hospital) => {
+  filteredHospitals(soloHospitals).forEach((hospital) => {
     const marker = L.marker(hospital.latlng, { icon: createPin('H', 'map-pin-hospital') }).addTo(map);
     marker.bindPopup(`<strong>${hospital.name}</strong><br/>${(hospital.tags?.services || ['umum']).join(', ')}`);
     hospitalMarkers.push(marker);
@@ -202,11 +320,12 @@ function renderHospitalMarkers() {
 }
 
 function renderHospitalList() {
-  const items = filteredHospitals();
+  const currentBase = lastPosition || fallbackCenter;
+  const items = filteredHospitals(facilityCache.length ? facilityCache : soloHospitals);
   hospitalList.innerHTML = '';
   filterSummary.textContent = items.length
-    ? `Menampilkan ${items.length} rumah sakit, diurutkan dari yang paling dekat.`
-    : 'Tidak ada rumah sakit yang cocok dengan filter ini.';
+    ? `Menampilkan ${items.length} fasilitas medis terdekat untuk ${getConditionLabel(conditionFilter.value)}.`
+    : 'Tidak ada fasilitas medis yang cocok dengan filter ini.';
 
   items.forEach((hospital) => {
     const row = document.createElement('button');
@@ -215,17 +334,19 @@ function renderHospitalList() {
     row.innerHTML = `
       <div class="hospital-item-main">
         <strong>${hospital.name}</strong>
-        <span>${(hospital.tags?.services || ['umum']).join(' • ')}</span>
+        <span>${hospital.source === 'overpass'
+          ? [hospital.tags?.amenity, hospital.tags?.healthcare].filter(Boolean).join(' • ')
+          : (hospital.tags?.services || ['umum']).join(' • ')}</span>
       </div>
       <div class="hospital-item-meta">
         <b>${hospital.distance.toFixed(1)} km</b>
-        <small>${hospital.score > 0 ? 'Cocok' : 'Umum'}</small>
+        <small>${hospital.source === 'overpass' ? 'OSM' : 'Curated'}</small>
       </div>
     `;
     row.addEventListener('click', () => {
       activeHospital = hospital;
       hospitalMarker.setLatLng(hospital.latlng);
-      drawRoute(lastPosition || fallbackCenter, hospital.latlng, hospital.name);
+      drawRoute(currentBase, hospital.latlng, hospital.name);
       closeFilterModal();
       setStatus(`Dipilih: ${hospital.name}`);
     });
@@ -278,12 +399,11 @@ function drawRoute(fromLatLng, toLatLng, hospitalName) {
 }
 
 function chooseHospital(fromLatLng) {
+  const source = facilityCache.length ? facilityCache : soloHospitals;
   const candidate =
-    [...soloHospitals]
-      .filter((hospital) => matchesCondition(hospital, activeCase))
-      .map((hospital) => ({ ...hospital, distance: haversineKm(fromLatLng, hospital.latlng), score: scoreHospital(hospital) }))
+    filteredHospitals(source)
+      .filter((hospital) => serviceMatchesCondition(hospital.tags, hospital.name, activeCase))
       .sort((a, b) => (b.score - a.score) || (a.distance - b.distance))[0] || nearestHospital(fromLatLng);
-
   activeHospital = candidate;
   hospitalMarker.setLatLng(activeHospital.latlng);
   drawRoute(fromLatLng, activeHospital.latlng, activeHospital.name);
@@ -298,8 +418,24 @@ function setUserPosition(position) {
   userHalo.setLatLng(next);
   userDot.setLatLng(next);
   if (followUser) map.panTo(next, { animate: true, duration: 0.5 });
-  chooseHospital(next);
   setStatus(`Lokasi Anda • akurasi ±${Math.round(accuracy)} m`);
+  refreshFacilities(next).catch(() => {});
+}
+
+async function refreshFacilities(fromLatLng) {
+  try {
+    setStatus('Mencari fasilitas medis terdekat...');
+    const facilities = await fetchFacilities(fromLatLng);
+    if (facilities.length) {
+      facilityCache = facilities;
+      facilityCacheKey = `${fromLatLng[0].toFixed(3)}:${fromLatLng[1].toFixed(3)}:${conditionFilter.value}:${hospitalSearch.value.trim().toLowerCase()}`;
+      renderHospitalMarkers();
+    }
+  } catch {
+    facilityCache = [];
+  } finally {
+    chooseHospital(fromLatLng);
+  }
 }
 
 function initMap() {
@@ -388,7 +524,10 @@ filterModal.addEventListener('click', (e) => {
 });
 
 hospitalSearch.addEventListener('input', renderHospitalList);
-conditionFilter.addEventListener('change', renderHospitalList);
+conditionFilter.addEventListener('change', () => {
+  renderHospitalList();
+  if (lastPosition) refreshFacilities(lastPosition);
+});
 
 zoomInBtn.addEventListener('click', () => map.zoomIn());
 zoomOutBtn.addEventListener('click', () => map.zoomOut());
