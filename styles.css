@@ -134,6 +134,21 @@ body {
   display: none !important;
 }
 
+.filter-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 1125;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 8, 18, 0.58);
+  backdrop-filter: blur(10px);
+}
+
+.filter-modal[hidden] {
+  display: none !important;
+}
+
 .call-modal[hidden] {
   display: none !important;
 }
@@ -221,6 +236,112 @@ body {
   background: linear-gradient(180deg, rgba(11, 20, 35, 0.98), rgba(8, 14, 26, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.filter-card {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: min(82vh, 840px);
+  overflow: auto;
+  border-radius: 28px;
+  padding: 22px;
+  background: linear-gradient(180deg, rgba(11, 20, 35, 0.98), rgba(8, 14, 26, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.filter-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.filter-card h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.filter-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.filter-input,
+.filter-select {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  padding: 0 14px;
+  outline: none;
+}
+
+.filter-input::placeholder {
+  color: rgba(157, 176, 199, 0.75);
+}
+
+.filter-summary {
+  margin-top: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.hospital-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.hospital-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.hospital-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.hospital-item-main strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.hospital-item-main span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.hospital-item-meta {
+  text-align: right;
+  min-width: 92px;
+}
+
+.hospital-item-meta b,
+.hospital-item-meta small {
+  display: block;
+}
+
+.hospital-item-meta small {
+  color: var(--muted);
+  margin-top: 4px;
 }
 
 .case-head {
@@ -385,5 +506,16 @@ body {
   }
   .call-actions {
     grid-template-columns: 1fr;
+  }
+  .filter-bar {
+    grid-template-columns: 1fr;
+  }
+  .hospital-item {
+    align-items: start;
+    flex-direction: column;
+  }
+  .hospital-item-meta {
+    text-align: left;
+    min-width: 0;
   }
 }

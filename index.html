@@ -29,6 +29,7 @@
         <button class="hud-btn" id="centerBtn">Pusatkan</button>
         <button class="hud-btn" id="locBtn">Lokasi saya</button>
         <button class="hud-btn" id="caseBtn">Pilih kondisi</button>
+        <button class="hud-btn" id="filterBtn">Filter RS</button>
         <button class="hud-btn hud-btn-accent" id="callBtn">Panggil ambulans</button>
         <span class="hud-pill" id="statusPill">Mencari lokasi...</span>
       </div>
@@ -61,6 +62,31 @@
           </div>
           <p class="case-copy">Kami akan cari rumah sakit terdekat yang paling cocok lalu buat rute otomatis.</p>
           <div class="case-grid" id="caseGrid"></div>
+        </div>
+      </div>
+      <div class="filter-modal" id="filterModal" hidden>
+        <div class="filter-card" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
+          <div class="filter-head">
+            <div>
+              <p class="eyebrow">Cari RS</p>
+              <h2 id="filterTitle">Filter rumah sakit berdasarkan kondisi</h2>
+            </div>
+            <button class="case-close" id="filterCloseBtn" aria-label="Tutup">&times;</button>
+          </div>
+          <div class="filter-bar">
+            <input id="hospitalSearch" class="filter-input" type="search" placeholder="Cari nama rumah sakit..." />
+            <select id="conditionFilter" class="filter-select" aria-label="Filter kondisi">
+              <option value="all">Semua kondisi</option>
+              <option value="igd">IGD / Darurat</option>
+              <option value="trauma">Trauma</option>
+              <option value="jantung">Jantung</option>
+              <option value="anak">Anak</option>
+              <option value="ibu">Ibu & Bayi</option>
+              <option value="umum">Umum</option>
+            </select>
+          </div>
+          <div class="filter-summary" id="filterSummary">Menampilkan rumah sakit terdekat yang cocok.</div>
+          <div class="hospital-list" id="hospitalList"></div>
         </div>
       </div>
     </main>

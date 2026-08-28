@@ -1,6 +1,7 @@
 const centerBtn = document.getElementById('centerBtn');
 const locBtn = document.getElementById('locBtn');
 const caseBtn = document.getElementById('caseBtn');
+const filterBtn = document.getElementById('filterBtn');
 const callBtn = document.getElementById('callBtn');
 const callModal = document.getElementById('callModal');
 const callCloseBtn = document.getElementById('callCloseBtn');
@@ -13,6 +14,12 @@ const geoError = document.getElementById('geoError');
 const caseModal = document.getElementById('caseModal');
 const caseGrid = document.getElementById('caseGrid');
 const caseCloseBtn = document.getElementById('caseCloseBtn');
+const filterModal = document.getElementById('filterModal');
+const filterCloseBtn = document.getElementById('filterCloseBtn');
+const hospitalSearch = document.getElementById('hospitalSearch');
+const conditionFilter = document.getElementById('conditionFilter');
+const hospitalList = document.getElementById('hospitalList');
+const filterSummary = document.getElementById('filterSummary');
 
 const patientCases = [
   { id: 'umum', label: 'Umum', hint: 'Keluhan umum, demam, lemas.' },
@@ -24,12 +31,12 @@ const patientCases = [
 ];
 
 const soloHospitals = [
-  { name: 'RSUD Dr. Moewardi', latlng: [-7.558, 110.7758], tags: { emergency: 'yes' } },
-  { name: 'RS Ortopedi Prof. Dr. R. Soeharso', latlng: [-7.557653, 110.773923], tags: { emergency: 'yes' } },
-  { name: 'RS Kasih Ibu Surakarta', latlng: [-7.5592, 110.8062], tags: { emergency: 'yes' } },
-  { name: 'RSUD Bung Karno Surakarta', latlng: [-7.5495, 110.8396], tags: { emergency: 'yes' } },
-  { name: 'RS PKU Muhammadiyah Surakarta', latlng: [-7.5652, 110.8162], tags: { emergency: 'yes' } },
-  { name: 'RS Dr. Oen Solo Baru', latlng: [-7.6014, 110.8189], tags: { emergency: 'yes' } },
+  { name: 'RSUD Dr. Moewardi', latlng: [-7.558, 110.7758], tags: { emergency: 'yes', services: ['igd', 'umum', 'trauma'] } },
+  { name: 'RS Ortopedi Prof. Dr. R. Soeharso', latlng: [-7.557653, 110.773923], tags: { emergency: 'yes', services: ['trauma', 'igd', 'umum'] } },
+  { name: 'RS Kasih Ibu Surakarta', latlng: [-7.5592, 110.8062], tags: { emergency: 'yes', services: ['umum', 'anak', 'ibu'] } },
+  { name: 'RSUD Bung Karno Surakarta', latlng: [-7.5495, 110.8396], tags: { emergency: 'yes', services: ['igd', 'umum', 'ibu'] } },
+  { name: 'RS PKU Muhammadiyah Surakarta', latlng: [-7.5652, 110.8162], tags: { emergency: 'yes', services: ['igd', 'umum', 'anak', 'ibu'] } },
+  { name: 'RS Dr. Oen Solo Baru', latlng: [-7.6014, 110.8189], tags: { emergency: 'yes', services: ['igd', 'umum', 'jantung'] } },
 ];
 
 const hospitalKeywords = {
@@ -51,14 +58,40 @@ let lastPosition = null;
 let activeCase = 'igd';
 let activeHospital = soloHospitals[0];
 let followUser = true;
+let hospitalMarkers = [];
 
 const fallbackCenter = [-7.5566, 110.8205];
 
-function setStatus(text) { statusPill.textContent = text; }
-function showError(text) { geoError.textContent = text; geoError.hidden = false; }
-function hideError() { geoError.hidden = true; geoError.textContent = ''; }
-function openCallModal() { callModal.hidden = false; }
-function closeCallModal() { callModal.hidden = true; }
+function setStatus(text) {
+  statusPill.textContent = text;
+}
+
+function showError(text) {
+  geoError.textContent = text;
+  geoError.hidden = false;
+}
+
+function hideError() {
+  geoError.hidden = true;
+  geoError.textContent = '';
+}
+
+function openCallModal() {
+  callModal.hidden = false;
+}
+
+function closeCallModal() {
+  callModal.hidden = true;
+}
+
+function openFilterModal() {
+  filterModal.hidden = false;
+  renderHospitalList();
+}
+
+function closeFilterModal() {
+  filterModal.hidden = true;
+}
 
 function getCurrentPosition() {
   return new Promise((resolve, reject) => {
@@ -121,7 +154,16 @@ function scoreHospital(hospital) {
   if (name.includes('igd')) score += 2;
   if (name.includes('rsud')) score += 2;
   if (hospital.tags?.emergency === 'yes') score += 1;
+  if (hospital.tags?.services?.includes(activeCase)) score += 3;
   return score;
+}
+
+function matchesCondition(hospital, filterValue) {
+  if (filterValue === 'all') return true;
+  if (filterValue === 'igd') {
+    return hospital.tags?.services?.includes('igd') || normalize(hospital.name).includes('igd') || hospital.tags?.emergency === 'yes';
+  }
+  return hospital.tags?.services?.includes(filterValue) || normalize(hospital.name).includes(filterValue);
 }
 
 function nearestHospital(fromLatLng) {
@@ -130,8 +172,65 @@ function nearestHospital(fromLatLng) {
     .sort((a, b) => (b.score - a.score) || (a.distance - b.distance))[0];
 }
 
-function buildRouteUrl(fromLatLng, toLatLng) {
-  return `https://router.project-osrm.org/route/v1/driving/${fromLatLng[1]},${fromLatLng[0]};${toLatLng[1]},${toLatLng[0]}?overview=full&geometries=geojson&steps=true`;
+function filteredHospitals() {
+  const query = normalize(hospitalSearch.value.trim());
+  const condition = conditionFilter.value;
+  const base = lastPosition || fallbackCenter;
+
+  return soloHospitals
+    .filter((hospital) => {
+      const nameMatch = !query || normalize(hospital.name).includes(query);
+      const conditionMatch = matchesCondition(hospital, condition);
+      return nameMatch && conditionMatch;
+    })
+    .map((hospital) => ({
+      ...hospital,
+      distance: haversineKm(base, hospital.latlng),
+      score: scoreHospital(hospital),
+    }))
+    .sort((a, b) => a.distance - b.distance || b.score - a.score);
+}
+
+function renderHospitalMarkers() {
+  hospitalMarkers.forEach((marker) => map.removeLayer(marker));
+  hospitalMarkers = [];
+  soloHospitals.forEach((hospital) => {
+    const marker = L.marker(hospital.latlng, { icon: createPin('H', 'map-pin-hospital') }).addTo(map);
+    marker.bindPopup(`<strong>${hospital.name}</strong><br/>${(hospital.tags?.services || ['umum']).join(', ')}`);
+    hospitalMarkers.push(marker);
+  });
+}
+
+function renderHospitalList() {
+  const items = filteredHospitals();
+  hospitalList.innerHTML = '';
+  filterSummary.textContent = items.length
+    ? `Menampilkan ${items.length} rumah sakit, diurutkan dari yang paling dekat.`
+    : 'Tidak ada rumah sakit yang cocok dengan filter ini.';
+
+  items.forEach((hospital) => {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'hospital-item';
+    row.innerHTML = `
+      <div class="hospital-item-main">
+        <strong>${hospital.name}</strong>
+        <span>${(hospital.tags?.services || ['umum']).join(' • ')}</span>
+      </div>
+      <div class="hospital-item-meta">
+        <b>${hospital.distance.toFixed(1)} km</b>
+        <small>${hospital.score > 0 ? 'Cocok' : 'Umum'}</small>
+      </div>
+    `;
+    row.addEventListener('click', () => {
+      activeHospital = hospital;
+      hospitalMarker.setLatLng(hospital.latlng);
+      drawRoute(lastPosition || fallbackCenter, hospital.latlng, hospital.name);
+      closeFilterModal();
+      setStatus(`Dipilih: ${hospital.name}`);
+    });
+    hospitalList.appendChild(row);
+  });
 }
 
 function drawRoute(fromLatLng, toLatLng, hospitalName) {
@@ -179,15 +278,21 @@ function drawRoute(fromLatLng, toLatLng, hospitalName) {
 }
 
 function chooseHospital(fromLatLng) {
-  activeHospital = nearestHospital(fromLatLng);
+  const candidate =
+    [...soloHospitals]
+      .filter((hospital) => matchesCondition(hospital, activeCase))
+      .map((hospital) => ({ ...hospital, distance: haversineKm(fromLatLng, hospital.latlng), score: scoreHospital(hospital) }))
+      .sort((a, b) => (b.score - a.score) || (a.distance - b.distance))[0] || nearestHospital(fromLatLng);
+
+  activeHospital = candidate;
   hospitalMarker.setLatLng(activeHospital.latlng);
   drawRoute(fromLatLng, activeHospital.latlng, activeHospital.name);
+  renderHospitalList();
 }
 
 function setUserPosition(position) {
   const { latitude, longitude, accuracy } = position.coords;
   const next = [latitude, longitude];
-  const prev = lastPosition || next;
   lastPosition = next;
   ambulanceMarker.setLatLng(next);
   userHalo.setLatLng(next);
@@ -217,7 +322,11 @@ function initMap() {
     interactive: false,
   }).addTo(map);
 
-  map.on('dragstart', () => { followUser = false; });
+  map.on('dragstart', () => {
+    followUser = false;
+  });
+
+  renderHospitalMarkers();
 }
 
 function startTracking() {
@@ -225,43 +334,86 @@ function startTracking() {
     showError('Browser Anda tidak mendukung lokasi.');
     return;
   }
-  navigator.geolocation.watchPosition(setUserPosition, () => {
-    showError('Izin lokasi belum aktif.');
-    setStatus('Menunggu izin lokasi');
-  }, { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 });
+  navigator.geolocation.watchPosition(
+    setUserPosition,
+    () => {
+      showError('Izin lokasi belum aktif.');
+      setStatus('Menunggu izin lokasi');
+    },
+    { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
+  );
 }
 
 centerBtn.addEventListener('click', () => {
   followUser = true;
   map.flyTo(lastPosition || fallbackCenter, Math.max(map.getZoom(), 15), { duration: 0.5 });
 });
-locBtn.addEventListener('click', () => navigator.geolocation?.getCurrentPosition(setUserPosition, () => showError('Akses lokasi ditolak.'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }));
-caseBtn.addEventListener('click', () => { caseModal.hidden = false; });
+
+locBtn.addEventListener(
+  'click',
+  () =>
+    navigator.geolocation?.getCurrentPosition(
+      setUserPosition,
+      () => showError('Akses lokasi ditolak.'),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    ),
+);
+
+caseBtn.addEventListener('click', () => {
+  caseModal.hidden = false;
+});
+
+filterBtn.addEventListener('click', () => {
+  openFilterModal();
+});
+
 caseCloseBtn.addEventListener('click', (event) => {
   event.preventDefault();
   event.stopPropagation();
   caseModal.hidden = true;
 });
-caseModal.addEventListener('click', (e) => { if (e.target === caseModal) caseModal.hidden = true; });
+
+caseModal.addEventListener('click', (e) => {
+  if (e.target === caseModal) caseModal.hidden = true;
+});
+
+filterCloseBtn.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  closeFilterModal();
+});
+
+filterModal.addEventListener('click', (e) => {
+  if (e.target === filterModal) closeFilterModal();
+});
+
+hospitalSearch.addEventListener('input', renderHospitalList);
+conditionFilter.addEventListener('change', renderHospitalList);
+
 zoomInBtn.addEventListener('click', () => map.zoomIn());
 zoomOutBtn.addEventListener('click', () => map.zoomOut());
+
 callBtn.addEventListener('click', () => {
   setStatus('Pilih metode panggilan');
   openCallModal();
 });
+
 callCloseBtn.addEventListener('click', (event) => {
   event.preventDefault();
   event.stopPropagation();
   closeCallModal();
 });
+
 callModal.addEventListener('click', (event) => {
   if (event.target === callModal) closeCallModal();
 });
+
 callPhoneBtn.addEventListener('click', () => {
   setStatus('Mempersiapkan panggilan telepon...');
   closeCallModal();
   window.location.href = 'tel:119';
 });
+
 callWhatsAppBtn.addEventListener('click', () => {
   const phone = '6281234567890';
   const baseMessage = 'Halo, saya butuh ambulans. Mohon kirim bantuan ke lokasi saya sekarang.';
@@ -284,5 +436,6 @@ callWhatsAppBtn.addEventListener('click', () => {
 renderCases();
 initMap();
 startTracking();
+renderHospitalList();
 caseModal.hidden = false;
 setStatus('Pilih kondisi pasien');
