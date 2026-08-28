@@ -171,7 +171,11 @@ function getFacilityType(facility) {
   const name = normalize(facility.name);
   if (tags.amenity === 'hospital' || tags.healthcare === 'hospital' || name.includes('rs')) return 'RS';
   if (name.includes('puskesmas') || tags.amenity === 'clinic' || tags.healthcare === 'clinic' || tags.healthcare === 'centre') return 'Puskesmas/Klinik';
-  if (tags.amenity === 'doctors') return 'Dokter';
+  if (tags.amenity === 'doctors' || tags.healthcare === 'doctor') return 'Dokter';
+  if (tags.amenity === 'pharmacy' || tags.healthcare === 'pharmacy') return 'Apotek';
+  if (tags.healthcare === 'midwife') return 'Bidan';
+  if (tags.amenity === 'dentist' || tags.healthcare === 'dentist') return 'Dokter Gigi';
+  if (tags.healthcare === 'health post') return 'Pos Kesehatan';
   return 'Fasilitas Medis';
 }
 
@@ -180,6 +184,10 @@ function getFacilityLabel(facility) {
   if (type === 'RS') return 'Rumah Sakit';
   if (type === 'Puskesmas/Klinik') return normalize(facility.name).includes('puskesmas') ? 'Puskesmas' : 'Klinik';
   if (type === 'Dokter') return 'Dokter';
+  if (type === 'Apotek') return 'Apotek';
+  if (type === 'Bidan') return 'Bidan';
+  if (type === 'Dokter Gigi') return 'Dokter Gigi';
+  if (type === 'Pos Kesehatan') return 'Pos Kesehatan';
   return 'Fasilitas Medis';
 }
 
@@ -202,8 +210,15 @@ function facilityScore(facility) {
   if (tags.amenity === 'hospital') score += 8;
   if (tags.amenity === 'clinic') score += 6;
   if (tags.amenity === 'doctors') score += 4;
+  if (tags.amenity === 'pharmacy') score += 1;
+  if (tags.amenity === 'dentist') score += 2;
   if (tags.healthcare === 'hospital') score += 8;
   if (tags.healthcare === 'clinic' || tags.healthcare === 'centre') score += 6;
+  if (tags.healthcare === 'doctor') score += 4;
+  if (tags.healthcare === 'midwife') score += 3;
+  if (tags.healthcare === 'dentist') score += 2;
+  if (tags.healthcare === 'health post') score += 2;
+  if (tags.healthcare === 'pharmacy') score += 1;
   if (name.includes('rsud')) score += 3;
   if (name.includes('puskesmas')) score += 4;
   if (name.includes('igd') || name.includes('emergency')) score += 3;
@@ -216,7 +231,7 @@ function serviceMatchesCondition(tags = {}, name = '', condition = 'all') {
   const value = normalize(name);
   const services = normalize(`${tags.amenity || ''} ${tags.healthcare || ''} ${tags.emergency || ''}`);
   if (condition === 'igd') {
-    return services.includes('hospital') || services.includes('clinic') || services.includes('doctors') || value.includes('igd') || value.includes('emergency') || value.includes('rs') || value.includes('puskesmas');
+    return services.includes('hospital') || services.includes('clinic') || services.includes('doctors') || services.includes('pharmacy') || value.includes('igd') || value.includes('emergency') || value.includes('rs') || value.includes('puskesmas');
   }
   if (condition === 'trauma') return value.includes('ortopedi') || value.includes('trauma') || services.includes('hospital');
   if (condition === 'jantung') return value.includes('jantung') || value.includes('cardio') || value.includes('heart');
@@ -259,12 +274,33 @@ function buildOverpassQuery(lat, lng, radiusMeters) {
   node(around:${radiusMeters},${lat},${lng})[amenity=doctors];
   way(around:${radiusMeters},${lat},${lng})[amenity=doctors];
   relation(around:${radiusMeters},${lat},${lng})[amenity=doctors];
+  node(around:${radiusMeters},${lat},${lng})[amenity=pharmacy];
+  way(around:${radiusMeters},${lat},${lng})[amenity=pharmacy];
+  relation(around:${radiusMeters},${lat},${lng})[amenity=pharmacy];
+  node(around:${radiusMeters},${lat},${lng})[amenity=dentist];
+  way(around:${radiusMeters},${lat},${lng})[amenity=dentist];
+  relation(around:${radiusMeters},${lat},${lng})[amenity=dentist];
   node(around:${radiusMeters},${lat},${lng})[healthcare=centre];
   way(around:${radiusMeters},${lat},${lng})[healthcare=centre];
   relation(around:${radiusMeters},${lat},${lng})[healthcare=centre];
   node(around:${radiusMeters},${lat},${lng})[healthcare=facility];
   way(around:${radiusMeters},${lat},${lng})[healthcare=facility];
   relation(around:${radiusMeters},${lat},${lng})[healthcare=facility];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=doctor];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=doctor];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=doctor];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=midwife];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=midwife];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=midwife];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=dentist];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=dentist];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=dentist];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=health post];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=health post];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=health post];
+  node(around:${radiusMeters},${lat},${lng})[healthcare=vaccination centre];
+  way(around:${radiusMeters},${lat},${lng})[healthcare=vaccination centre];
+  relation(around:${radiusMeters},${lat},${lng})[healthcare=vaccination centre];
 );
 out center tags;
 `;
