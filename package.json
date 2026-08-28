@@ -2,10 +2,5 @@
   "name": "smart-ambulance-navigation",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "node build.mjs",
-    "build": "node build.mjs",
-    "preview": "node build.mjs"
-  }
+  "type": "module"
 }

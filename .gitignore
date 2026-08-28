@@ -1,0 +1,12 @@
+dist/
+.openai/
+*.zip
+PortableGit.exe
+mingit/
+*.pdf
+hosting.json
+package_root/
+flat.zip
+flat2.zip
+build.zip
+site.zip
