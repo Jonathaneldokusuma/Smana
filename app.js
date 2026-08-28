@@ -477,36 +477,31 @@ async function refreshFacilities(fromLatLng) {
 function initMap() {
   map = L.map('map', { zoomControl: false, attributionControl: false, scrollWheelZoom: true }).setView(fallbackCenter, 15);
 
-  const tileSources = [
-    {
-      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      options: { maxZoom: 19, subdomains: ['a', 'b', 'c'] },
-    },
-    {
-      url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-      options: { maxZoom: 20, subdomains: ['a', 'b', 'c', 'd'] },
-    },
-    {
-      url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-      options: { maxZoom: 20, subdomains: ['a', 'b', 'c'] },
-    },
-  ];
+  const mapHost = document.getElementById('map');
+  const fallback = document.createElement('div');
+  fallback.className = 'map-fallback';
+  fallback.innerHTML = '<span>Peta sedang dimuat...</span>';
+  mapHost.appendChild(fallback);
 
-  tileSources.forEach((source, index) => {
-    const layer = L.tileLayer(source.url, source.options);
-    if (index === 0) {
-      layer.addTo(map);
-    }
-    layer.on('tileerror', () => {
-      if (map.hasLayer(layer)) {
-        map.removeLayer(layer);
-        const next = tileSources[index + 1];
-        if (next) {
-          L.tileLayer(next.url, next.options).addTo(map);
-        }
-      }
-    });
+  const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    crossOrigin: true,
+    errorTileUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#08111d"/></svg>'),
+  }).addTo(map);
+
+  tileLayer.on('load', () => {
+    if (fallback.isConnected) fallback.remove();
   });
+
+  tileLayer.on('tileerror', () => {
+    if (fallback.isConnected) fallback.innerHTML = '<span>Peta lambat dimuat, memakai tampilan dasar.</span>';
+  });
+
+  setTimeout(() => {
+    if (fallback.isConnected) {
+      fallback.innerHTML = '<span>Peta belum muncul, cek koneksi atau blokir tile.</span>';
+    }
+  }, 4000);
 
   ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('🚑', 'map-pin-ambulance') }).addTo(map);
   hospitalMarker = L.marker(soloHospitals[0].latlng, { icon: createPin('H', 'map-pin-hospital') }).addTo(map);
@@ -609,3 +604,4 @@ startTracking();
 renderHospitalList();
 caseModal.hidden = false;
 setStatus('Pilih kondisi pasien');
+

@@ -34,6 +34,10 @@ body {
 #map {
   position: absolute;
   inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(67, 224, 180, 0.08), transparent 22%),
+    radial-gradient(circle at 80% 80%, rgba(122, 184, 255, 0.08), transparent 20%),
+    linear-gradient(180deg, #0b1320 0%, #060910 100%);
 }
 
 .hud {
@@ -512,7 +516,31 @@ body {
 }
 
 .leaflet-container {
-  background: #000000;
+  background:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    #08111d;
+  background-size: 48px 48px;
+}
+
+.map-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 400;
+  pointer-events: none;
+  color: rgba(241, 245, 249, 0.72);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.map-fallback span {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(5, 8, 15, 0.72);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: var(--shadow);
 }
 
 .current-ring {
