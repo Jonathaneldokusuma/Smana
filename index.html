@@ -115,6 +115,32 @@
           <div class="hospital-list" id="hospitalList"></div>
         </div>
       </div>
+      <div class="profile-modal" id="profileModal" hidden>
+        <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileName">
+          <button class="profile-close" id="profileCloseBtn" aria-label="Tutup">&times;</button>
+          <div class="profile-banner">
+            <div class="profile-avatar" id="profileBadge">RS</div>
+            <div class="profile-banner-copy">
+              <p class="eyebrow">Profil fasilitas</p>
+              <h2 id="profileName">Rumah Sakit</h2>
+              <p id="profileDistance">Jarak</p>
+            </div>
+          </div>
+          <div class="profile-block">
+            <span class="profile-label">Jenis</span>
+            <strong id="profileTypeLabel">-</strong>
+          </div>
+          <div class="profile-block">
+            <span class="profile-label">Layanan</span>
+            <strong id="profileServices">-</strong>
+          </div>
+          <div class="profile-block">
+            <span class="profile-label">Alamat / Area</span>
+            <strong id="profileAddress">-</strong>
+          </div>
+          <a class="profile-action" id="profileAction" href="#" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>
+        </div>
+      </div>
     </main>
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
