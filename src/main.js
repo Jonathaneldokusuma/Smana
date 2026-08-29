@@ -333,8 +333,8 @@ function createPin(kind, className) {
   return L.divIcon({
     className: `map-pin ${className}`,
     html: getMarkerSvg(kind),
-    iconSize: [54, 54],
-    iconAnchor: [27, 27],
+    iconSize: [46, 46],
+    iconAnchor: [23, 23],
   });
 }
 
@@ -343,7 +343,7 @@ function getMarkerSvg(kind) {
   const icons = {
     ambulance: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a1)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a1)" stroke="${stroke}" stroke-width="2"/>
         <path d="M21 28h18l4 6h4v8h-4a5 5 0 0 1-10 0H31a5 5 0 0 1-10 0h-2v-8h2z" fill="#dff6ff" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round"/>
         <path d="M28 22v7h-7v6h7v7h6v-7h7v-6h-7v-7z" fill="#ff4d4d"/>
         <circle cx="25" cy="41" r="3.4" fill="#0b1220"/>
@@ -352,7 +352,7 @@ function getMarkerSvg(kind) {
       </svg>`,
     hospital: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a2)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a2)" stroke="${stroke}" stroke-width="2"/>
         <path d="M23 19h18a4 4 0 0 1 4 4v20H19V23a4 4 0 0 1 4-4z" fill="#fff1f2" stroke="${stroke}" stroke-width="1.5"/>
         <path d="M30 24h4v6h6v4h-6v6h-4v-6h-6v-4h6z" fill="#ff4d4d"/>
         <path d="M23 43h18" stroke="#e11d48" stroke-width="2" stroke-linecap="round"/>
@@ -360,7 +360,7 @@ function getMarkerSvg(kind) {
       </svg>`,
     puskesmas: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a3)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a3)" stroke="${stroke}" stroke-width="2"/>
         <path d="M19 33c5-1 8-7 13-7s8 6 13 7" fill="none" stroke="#eaffff" stroke-width="4" stroke-linecap="round"/>
         <path d="M22 36h20" stroke="#0e7490" stroke-width="4" stroke-linecap="round"/>
         <path d="M32 18v28" stroke="#eaffff" stroke-width="4" stroke-linecap="round"/>
@@ -368,7 +368,7 @@ function getMarkerSvg(kind) {
       </svg>`,
     clinic: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a4)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a4)" stroke="${stroke}" stroke-width="2"/>
         <path d="M21 35c4-7 8-12 11-12s7 5 11 12" fill="none" stroke="#e9fff5" stroke-width="4" stroke-linecap="round"/>
         <path d="M24 38h16" stroke="#059669" stroke-width="4" stroke-linecap="round"/>
         <path d="M32 24v14" stroke="#e9fff5" stroke-width="4" stroke-linecap="round"/>
@@ -376,7 +376,7 @@ function getMarkerSvg(kind) {
       </svg>`,
     doctor: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a5)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a5)" stroke="${stroke}" stroke-width="2"/>
         <path d="M25 21h14l2 5v6c0 5-4 9-9 9s-9-4-9-9v-6z" fill="#fff6df" stroke="${stroke}" stroke-width="1.5"/>
         <path d="M32 18v9" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
         <path d="M32 33c3 0 5 2 5 5s-2 6-5 6-5-3-5-6 2-5 5-5z" fill="#f59e0b"/>
@@ -384,7 +384,7 @@ function getMarkerSvg(kind) {
       </svg>`,
     pharmacy: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a6)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a6)" stroke="${stroke}" stroke-width="2"/>
         <path d="M22 24h20v6H22z" fill="#f4f0ff" stroke="${stroke}" stroke-width="1.5"/>
         <path d="M24 30h16v16a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4z" fill="#ffffff" stroke="${stroke}" stroke-width="1.5"/>
         <path d="M32 36v8M28 40h8" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round"/>
@@ -392,28 +392,28 @@ function getMarkerSvg(kind) {
       </svg>`,
     midwife: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a7)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a7)" stroke="${stroke}" stroke-width="2"/>
         <path d="M22 28c4-6 16-6 20 0" fill="none" stroke="#fff1f7" stroke-width="4" stroke-linecap="round"/>
         <path d="M26 32h12M32 24v16" stroke="#ff5d8f" stroke-width="4" stroke-linecap="round"/>
         <defs><linearGradient id="a7" x1="18" y1="14" x2="46" y2="50"><stop stop-color="#ffd0e1"/><stop offset="1" stop-color="#ff7aa5"/></linearGradient></defs>
       </svg>`,
     dentist: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a8)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a8)" stroke="${stroke}" stroke-width="2"/>
         <path d="M24 22h16l2 5v7c0 4-2 10-6 10-2 0-3-2-4-5-1 3-2 5-4 5-4 0-6-6-6-10v-7z" fill="#fff8db" stroke="${stroke}" stroke-width="1.5"/>
         <path d="M28 33h8M32 29v8" stroke="#d97706" stroke-width="4" stroke-linecap="round"/>
         <defs><linearGradient id="a8" x1="18" y1="14" x2="46" y2="50"><stop stop-color="#ffe7a0"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs>
       </svg>`,
     post: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a9)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a9)" stroke="${stroke}" stroke-width="2"/>
         <path d="M22 22h20v20H22z" fill="#eef2ff" stroke="${stroke}" stroke-width="1.5"/>
         <path d="M28 32h8M32 28v8" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
         <defs><linearGradient id="a9" x1="18" y1="14" x2="46" y2="50"><stop stop-color="#d8e0ea"/><stop offset="1" stop-color="#94a3b8"/></linearGradient></defs>
       </svg>`,
     default: `
       <svg viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="url(#a10)" stroke="${stroke}" stroke-width="2"/>
+        <circle cx="32" cy="32" r="23" fill="url(#a10)" stroke="${stroke}" stroke-width="2"/>
         <path d="M20 32h24" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
         <defs><linearGradient id="a10" x1="18" y1="14" x2="46" y2="50"><stop stop-color="#eef2f7"/><stop offset="1" stop-color="#c7d0dd"/></linearGradient></defs>
       </svg>`,
@@ -768,7 +768,35 @@ function buildFacilitySource() {
 function renderHospitalMarkers() {
   hospitalMarkers.forEach((marker) => map.removeLayer(marker));
   hospitalMarkers = [];
-  filteredHospitals(buildFacilitySource()).slice(0, 25).forEach((hospital) => {
+  const items = filteredHospitals(buildFacilitySource());
+  const nationalMode = regionFilter.value === 'seluruh';
+  const quota = nationalMode
+    ? { hospital: 12, puskesmas: 8, clinic: 3, other: 2 }
+    : { hospital: 10, puskesmas: 6, clinic: 6, other: 3 };
+  const picked = [];
+  const used = new Set();
+  const pushByType = (typeName, limit) => {
+    items
+      .filter((item) => getFacilityLabel(item).toLowerCase().includes(typeName))
+      .slice(0, limit)
+      .forEach((item) => {
+        if (used.has(item.name + item.latlng.join(','))) return;
+        used.add(item.name + item.latlng.join(','));
+        picked.push(item);
+      });
+  };
+  pushByType('rumah sakit', quota.hospital);
+  pushByType('puskesmas', quota.puskesmas);
+  pushByType('klinik', quota.clinic);
+  items.slice(0, quota.other * 2).forEach((item) => {
+    if (picked.length >= 25) return;
+    const key = item.name + item.latlng.join(',');
+    if (used.has(key)) return;
+    used.add(key);
+    picked.push(item);
+  });
+
+  picked.slice(0, 25).forEach((hospital) => {
     const marker = L.marker(hospital.latlng, { icon: createPin(getMarkerLabel(hospital), getMarkerClass(hospital)) }).addTo(map);
     marker.bindPopup(`
       <strong>${hospital.name}</strong><br/>
@@ -991,8 +1019,17 @@ regionFilter.addEventListener('change', () => {
   if (lastPosition) refreshFacilities(getRegionBase());
 });
 
+const indonesiaBounds = L.latLngBounds([[-11.5, 94.5], [6.7, 141.5]]);
+
 zoomInBtn.addEventListener('click', () => map.zoomIn());
-zoomOutBtn.addEventListener('click', () => map.zoomOut());
+zoomOutBtn.addEventListener('click', () => {
+  const currentZoom = map.getZoom();
+  if (regionFilter.value === 'seluruh' || currentZoom <= 5) {
+    map.fitBounds(indonesiaBounds, { padding: [24, 24] });
+    return;
+  }
+  map.zoomOut();
+});
 
 callBtn.addEventListener('click', () => {
   setStatus('Pilih metode panggilan');
