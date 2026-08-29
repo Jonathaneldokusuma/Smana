@@ -18,6 +18,7 @@ const filterModal = document.getElementById('filterModal');
 const filterCloseBtn = document.getElementById('filterCloseBtn');
 const hospitalSearch = document.getElementById('hospitalSearch');
 const conditionFilter = document.getElementById('conditionFilter');
+const facilityFilter = document.getElementById('facilityFilter');
 const regionFilter = document.getElementById('regionFilter');
 const hospitalList = document.getElementById('hospitalList');
 const filterSummary = document.getElementById('filterSummary');
@@ -73,6 +74,20 @@ const seedFacilities = [
   { name: 'Puskesmas Coblong', latlng: [-6.8902, 107.6137], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'anak'] }, city: 'Bandung' },
   { name: 'Puskesmas Wonokromo', latlng: [-7.3089, 112.7385], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'ibu'] }, city: 'Surabaya' },
   { name: 'Puskesmas Tegal Sari', latlng: [-3.5818, 98.6781], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum'] }, city: 'Medan' },
+  { name: 'RSUP Prof. dr. I.G.N.G. Ngoerah', latlng: [-8.655, 115.2195], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'anak', 'ibu'] }, city: 'Denpasar' },
+  { name: 'RSUD Kota Yogyakarta', latlng: [-7.7972, 110.3694], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum'] }, city: 'Yogyakarta' },
+  { name: 'RS Bhayangkara Semarang', latlng: [-6.9812, 110.4208], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum'] }, city: 'Semarang' },
+  { name: 'RSUD Panembahan Senopati', latlng: [-7.8033, 110.3686], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'trauma'] }, city: 'Bantul' },
+  { name: 'Puskesmas Mantrijeron', latlng: [-7.8118, 110.3571], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'ibu'] }, city: 'Yogyakarta' },
+  { name: 'Puskesmas Tegalrejo', latlng: [-7.7798, 110.3518], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'anak'] }, city: 'Yogyakarta' },
+  { name: 'Klinik Utama Bunda', latlng: [-6.2234, 106.8463], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['ibu', 'anak', 'umum'] }, city: 'Jakarta' },
+  { name: 'Klinik Pratama Sehat Sentosa', latlng: [-6.9081, 107.6083], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum'] }, city: 'Bandung' },
+  { name: 'Apotek Kimia Farma Slamet Riyadi', latlng: [-7.5612, 110.8142], tags: { amenity: 'pharmacy', healthcare: 'pharmacy', services: ['umum'] }, city: 'Surakarta' },
+  { name: 'Apotek K-24 Cihampelas', latlng: [-6.9034, 107.6072], tags: { amenity: 'pharmacy', healthcare: 'pharmacy', services: ['umum'] }, city: 'Bandung' },
+  { name: 'Bidan Praktek Mandiri Ayu', latlng: [-7.5642, 110.8192], tags: { healthcare: 'midwife', services: ['ibu', 'anak'] }, city: 'Surakarta' },
+  { name: 'Bidan Praktik Mandiri Melati', latlng: [-6.2048, 106.8472], tags: { healthcare: 'midwife', services: ['ibu', 'anak'] }, city: 'Jakarta' },
+  { name: 'Dokter Gigi Smile Dental', latlng: [-7.5662, 110.8125], tags: { amenity: 'dentist', healthcare: 'dentist', services: ['umum'] }, city: 'Surakarta' },
+  { name: 'Klinik Gigi Sejahtera', latlng: [-7.2492, 112.7441], tags: { amenity: 'dentist', healthcare: 'dentist', services: ['umum'] }, city: 'Surabaya' },
 ];
 
 const hospitalKeywords = {
@@ -213,6 +228,30 @@ function getFacilityLabel(facility) {
   return 'Fasilitas Medis';
 }
 
+function getMarkerLabel(facility) {
+  const type = getFacilityType(facility);
+  if (type === 'RS') return 'RS';
+  if (type === 'Puskesmas/Klinik') return normalize(facility.name).includes('puskesmas') ? 'P' : 'K';
+  if (type === 'Dokter') return 'D';
+  if (type === 'Apotek') return 'A';
+  if (type === 'Bidan') return 'B';
+  if (type === 'Dokter Gigi') return 'G';
+  if (type === 'Pos Kesehatan') return 'Pos';
+  return 'F';
+}
+
+function getMarkerClass(facility) {
+  const type = getFacilityType(facility);
+  if (type === 'RS') return 'map-pin-hospital';
+  if (type === 'Puskesmas/Klinik') return normalize(facility.name).includes('puskesmas') ? 'map-pin-puskesmas' : 'map-pin-klinik';
+  if (type === 'Dokter') return 'map-pin-doctor';
+  if (type === 'Apotek') return 'map-pin-pharmacy';
+  if (type === 'Bidan') return 'map-pin-midwife';
+  if (type === 'Dokter Gigi') return 'map-pin-dentist';
+  if (type === 'Pos Kesehatan') return 'map-pin-post';
+  return 'map-pin-default';
+}
+
 function scoreHospital(hospital) {
   const name = normalize(hospital.name);
   const keywords = hospitalKeywords[activeCase] || hospitalKeywords.igd;
@@ -232,20 +271,32 @@ function facilityScore(facility) {
   if (tags.amenity === 'hospital') score += 8;
   if (tags.amenity === 'clinic') score += 6;
   if (tags.amenity === 'doctors') score += 4;
-  if (tags.amenity === 'pharmacy') score += 1;
-  if (tags.amenity === 'dentist') score += 2;
+  if (tags.amenity === 'pharmacy') score += 2;
+  if (tags.amenity === 'dentist') score += 3;
   if (tags.healthcare === 'hospital') score += 8;
   if (tags.healthcare === 'clinic' || tags.healthcare === 'centre') score += 6;
   if (tags.healthcare === 'doctor') score += 4;
   if (tags.healthcare === 'midwife') score += 3;
   if (tags.healthcare === 'dentist') score += 2;
   if (tags.healthcare === 'health post') score += 2;
-  if (tags.healthcare === 'pharmacy') score += 1;
+  if (tags.healthcare === 'pharmacy') score += 2;
   if (name.includes('rsud')) score += 3;
   if (name.includes('puskesmas')) score += 4;
   if (name.includes('igd') || name.includes('emergency')) score += 3;
   if (tags.emergency === 'yes') score += 2;
   return score;
+}
+
+function facilityTypeKey(facility) {
+  const type = getFacilityType(facility);
+  if (type === 'RS') return 'hospital';
+  if (type === 'Puskesmas/Klinik') return normalize(facility.name).includes('puskesmas') ? 'puskesmas' : 'clinic';
+  if (type === 'Dokter') return 'doctor';
+  if (type === 'Apotek') return 'pharmacy';
+  if (type === 'Bidan') return 'midwife';
+  if (type === 'Dokter Gigi') return 'dentist';
+  if (type === 'Pos Kesehatan') return 'post';
+  return 'all';
 }
 
 function serviceMatchesCondition(tags = {}, name = '', condition = 'all') {
@@ -261,6 +312,11 @@ function serviceMatchesCondition(tags = {}, name = '', condition = 'all') {
   if (condition === 'ibu') return value.includes('ibu') || value.includes('bersalin') || value.includes('maternity') || value.includes('obgyn');
   if (condition === 'umum') return true;
   return true;
+}
+
+function matchesFacilityType(facility, typeValue = 'all') {
+  if (typeValue === 'all') return true;
+  return facilityTypeKey(facility) === typeValue;
 }
 
 function matchesCondition(hospital, filterValue) {
@@ -359,13 +415,15 @@ async function fetchFacilities(fromLatLng) {
 function filteredHospitals(source = soloHospitals) {
   const query = normalize(hospitalSearch.value.trim());
   const condition = conditionFilter.value;
+  const facilityType = facilityFilter.value;
   const base = getRegionBase();
 
   return source
     .filter((hospital) => {
       const nameMatch = !query || normalize(hospital.name).includes(query);
       const conditionMatch = matchesCondition(hospital, condition) && serviceMatchesCondition(hospital.tags, hospital.name, condition);
-      return nameMatch && conditionMatch;
+      const facilityMatch = matchesFacilityType(hospital, facilityType);
+      return nameMatch && conditionMatch && facilityMatch;
     })
     .map((hospital) => ({
       ...hospital,
@@ -383,7 +441,7 @@ function renderHospitalMarkers() {
   hospitalMarkers.forEach((marker) => map.removeLayer(marker));
   hospitalMarkers = [];
   filteredHospitals(buildFacilitySource()).slice(0, 25).forEach((hospital) => {
-    const marker = L.marker(hospital.latlng, { icon: createPin('H', 'map-pin-hospital') }).addTo(map);
+    const marker = L.marker(hospital.latlng, { icon: createPin(getMarkerLabel(hospital), getMarkerClass(hospital)) }).addTo(map);
     marker.bindPopup(`
       <strong>${hospital.name}</strong><br/>
       ${getFacilityLabel(hospital)}<br/>
@@ -407,7 +465,7 @@ function renderHospitalList() {
     row.innerHTML = `
       <div class="hospital-item-main">
         <strong>${hospital.name}</strong>
-        <span>${hospital.source === 'overpass'
+        <span>${getFacilityLabel(hospital)} • ${hospital.source === 'overpass'
           ? [hospital.tags?.amenity, hospital.tags?.healthcare].filter(Boolean).join(' • ')
           : (hospital.tags?.services || ['umum']).join(' • ')}</span>
       </div>
@@ -582,6 +640,11 @@ hospitalSearch.addEventListener('input', () => {
 conditionFilter.addEventListener('change', () => {
   renderHospitalList();
   if (lastPosition) refreshFacilities(lastPosition);
+});
+
+facilityFilter.addEventListener('change', () => {
+  renderHospitalList();
+  renderHospitalMarkers();
 });
 
 regionFilter.addEventListener('change', () => {

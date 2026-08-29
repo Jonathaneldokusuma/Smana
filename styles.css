@@ -501,6 +501,78 @@ body {
   box-shadow: 0 0 0 8px rgba(229, 57, 53, 0.14);
 }
 
+.map-pin-puskesmas span {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #7ee2ff, #3aa7ff);
+  color: #ffffff;
+  font-size: 1rem;
+  box-shadow: 0 0 0 8px rgba(58, 167, 255, 0.14);
+}
+
+.map-pin-klinik span {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #7ef0c0, #43e0b4);
+  color: #05211b;
+  font-size: 1rem;
+  box-shadow: 0 0 0 8px rgba(67, 224, 180, 0.14);
+}
+
+.map-pin-doctor span {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #f8c069, #f39c12);
+  color: #231500;
+  font-size: 0.98rem;
+  box-shadow: 0 0 0 8px rgba(243, 156, 18, 0.14);
+}
+
+.map-pin-pharmacy span {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #c7a6ff, #8e65ff);
+  color: #ffffff;
+  font-size: 0.98rem;
+  box-shadow: 0 0 0 8px rgba(142, 101, 255, 0.14);
+}
+
+.map-pin-midwife span {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #ffa1c1, #ff6f91);
+  color: #3a0012;
+  font-size: 0.98rem;
+  box-shadow: 0 0 0 8px rgba(255, 111, 145, 0.14);
+}
+
+.map-pin-dentist span {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #ffd56a, #ffb703);
+  color: #302000;
+  font-size: 0.98rem;
+  box-shadow: 0 0 0 8px rgba(255, 183, 3, 0.14);
+}
+
+.map-pin-post span {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #93a4b8, #64748b);
+  color: #ffffff;
+  font-size: 0.92rem;
+  box-shadow: 0 0 0 8px rgba(100, 116, 139, 0.14);
+}
+
+.map-pin-default span {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #d7dde8, #aeb8c6);
+  color: #09101b;
+  font-size: 0.92rem;
+  box-shadow: 0 0 0 8px rgba(174, 184, 198, 0.14);
+}
+
 .map-pin-ambulance span,
 .map-pin-hospital span {
   border-radius: 50%;
