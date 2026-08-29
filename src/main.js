@@ -771,8 +771,8 @@ function renderHospitalMarkers() {
   const items = filteredHospitals(buildFacilitySource());
   const nationalMode = regionFilter.value === 'seluruh';
   const quota = nationalMode
-    ? { hospital: 12, puskesmas: 8, clinic: 3, other: 2 }
-    : { hospital: 10, puskesmas: 6, clinic: 6, other: 3 };
+    ? { hospital: 8, puskesmas: 6, clinic: 4, pharmacy: 2, other: 2 }
+    : { hospital: 8, puskesmas: 4, clinic: 5, pharmacy: 2, other: 3 };
   const picked = [];
   const used = new Set();
   const pushByType = (typeName, limit) => {
@@ -788,6 +788,7 @@ function renderHospitalMarkers() {
   pushByType('rumah sakit', quota.hospital);
   pushByType('puskesmas', quota.puskesmas);
   pushByType('klinik', quota.clinic);
+  pushByType('apotek', quota.pharmacy);
   items.slice(0, quota.other * 2).forEach((item) => {
     if (picked.length >= 25) return;
     const key = item.name + item.latlng.join(',');
@@ -924,7 +925,13 @@ async function refreshFacilities(fromLatLng) {
 }
 
 function initMap() {
-  map = L.map('map', { zoomControl: false, attributionControl: false, scrollWheelZoom: true }).setView(fallbackCenter, 15);
+  map = L.map('map', {
+    zoomControl: false,
+    attributionControl: false,
+    scrollWheelZoom: true,
+    minZoom: 5,
+    maxZoom: 19,
+  }).setView(fallbackCenter, 15);
 
   const mapHost = document.getElementById('map');
   const fallback = document.createElement('div');
@@ -964,6 +971,11 @@ function initMap() {
   }).addTo(map);
 
   map.on('dragstart', () => { followUser = false; });
+  map.on('zoomend', () => {
+    if (regionFilter.value === 'seluruh' && map.getZoom() <= 5) {
+      map.fitBounds(indonesiaBounds, { padding: [24, 24] });
+    }
+  });
   renderHospitalMarkers();
 }
 
