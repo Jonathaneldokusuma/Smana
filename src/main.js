@@ -53,6 +53,28 @@ const soloHospitals = [
   { name: 'RS Dr. Oen Solo Baru', latlng: [-7.6014, 110.8189], tags: { emergency: 'yes', services: ['igd', 'umum', 'jantung'] } },
 ];
 
+const seedFacilities = [
+  { name: 'RSUP Dr. Sardjito', latlng: [-7.7702, 110.3772], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'jantung', 'anak'] }, city: 'Yogyakarta' },
+  { name: 'RS Bethesda Yogyakarta', latlng: [-7.7859, 110.3811], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'ibu'] }, city: 'Yogyakarta' },
+  { name: 'RSUPN Dr. Cipto Mangunkusumo', latlng: [-6.1951, 106.8456], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'anak', 'ibu'] }, city: 'Jakarta' },
+  { name: 'RS Cipto Mangunkusumo Kencana', latlng: [-6.1939, 106.8458], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'ibu'] }, city: 'Jakarta' },
+  { name: 'RSUP Dr. Hasan Sadikin', latlng: [-6.8977, 107.6107], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'anak'] }, city: 'Bandung' },
+  { name: 'RS Advent Bandung', latlng: [-6.8979, 107.6146], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'ibu'] }, city: 'Bandung' },
+  { name: 'RSUD Dr. Soetomo', latlng: [-7.2684, 112.7581], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'trauma', 'umum'] }, city: 'Surabaya' },
+  { name: 'RSUD dr. Soewandhie', latlng: [-7.2464, 112.7445], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'anak'] }, city: 'Surabaya' },
+  { name: 'RSUP Kariadi', latlng: [-6.9857, 110.4092], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'jantung'] }, city: 'Semarang' },
+  { name: 'RS Islam Sultan Agung', latlng: [-6.9817, 110.4486], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'ibu'] }, city: 'Semarang' },
+  { name: 'RSUP H. Adam Malik', latlng: [3.5739, 98.6717], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'trauma'] }, city: 'Medan' },
+  { name: 'RS Columbia Asia Medan', latlng: [3.5874, 98.6712], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'jantung'] }, city: 'Medan' },
+  { name: 'RSUP Sanglah', latlng: [-8.6665, 115.2146], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'anak', 'ibu'] }, city: 'Denpasar' },
+  { name: 'Puskesmas Purwosari', latlng: [-7.5748, 110.8008], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'igd'] }, city: 'Surakarta' },
+  { name: 'Puskesmas Manahan', latlng: [-7.5509, 110.8048], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'anak'] }, city: 'Surakarta' },
+  { name: 'Puskesmas Kecamatan Menteng', latlng: [-6.1965, 106.8316], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'ibu', 'anak'] }, city: 'Jakarta' },
+  { name: 'Puskesmas Coblong', latlng: [-6.8902, 107.6137], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'anak'] }, city: 'Bandung' },
+  { name: 'Puskesmas Wonokromo', latlng: [-7.3089, 112.7385], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'ibu'] }, city: 'Surabaya' },
+  { name: 'Puskesmas Tegal Sari', latlng: [-3.5818, 98.6781], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum'] }, city: 'Medan' },
+];
+
 const hospitalKeywords = {
   umum: ['rsud', 'rumah sakit', 'hospital'],
   trauma: ['trauma', 'ortopedi', 'rsud'],
@@ -329,9 +351,9 @@ async function fetchFacilities(fromLatLng) {
     })
     .filter(Boolean);
 
-  facilityCache = facilities;
+  facilityCache = [...seedFacilities, ...facilities];
   facilityCacheKey = cacheKey;
-  return facilities;
+  return facilityCache;
 }
 
 function filteredHospitals(source = soloHospitals) {
@@ -353,10 +375,14 @@ function filteredHospitals(source = soloHospitals) {
     .sort((a, b) => a.distance - b.distance || b.score - a.score);
 }
 
+function buildFacilitySource() {
+  return facilityCache.length ? facilityCache : [...seedFacilities, ...soloHospitals];
+}
+
 function renderHospitalMarkers() {
   hospitalMarkers.forEach((marker) => map.removeLayer(marker));
   hospitalMarkers = [];
-  filteredHospitals(facilityCache.length ? facilityCache : soloHospitals).slice(0, 25).forEach((hospital) => {
+  filteredHospitals(buildFacilitySource()).slice(0, 25).forEach((hospital) => {
     const marker = L.marker(hospital.latlng, { icon: createPin('H', 'map-pin-hospital') }).addTo(map);
     marker.bindPopup(`
       <strong>${hospital.name}</strong><br/>
@@ -368,7 +394,7 @@ function renderHospitalMarkers() {
 }
 
 function renderHospitalList() {
-  const items = filteredHospitals(facilityCache.length ? facilityCache : soloHospitals);
+  const items = filteredHospitals(buildFacilitySource());
   hospitalList.innerHTML = '';
   filterSummary.textContent = items.length
     ? `Menampilkan ${items.length} fasilitas medis terdekat untuk ${getConditionLabel(conditionFilter.value)} di ${getRegionLabel()}.`
@@ -439,7 +465,7 @@ function drawRoute(fromLatLng, toLatLng, hospitalName) {
 }
 
 function chooseHospital(fromLatLng) {
-  const source = facilityCache.length ? facilityCache : soloHospitals;
+  const source = buildFacilitySource();
   const candidate = filteredHospitals(source).filter((hospital) => serviceMatchesCondition(hospital.tags, hospital.name, activeCase))[0] || nearestHospital(fromLatLng);
   activeHospital = candidate;
   hospitalMarker.setLatLng(activeHospital.latlng);
