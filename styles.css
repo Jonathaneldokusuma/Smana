@@ -811,6 +811,26 @@ body {
   .hud-pill {
     width: 100%;
   }
+  .case-card,
+  .filter-card,
+  .profile-card,
+  .call-card {
+    width: 100%;
+    max-height: 88vh;
+  }
+  .profile-modal {
+    place-items: end stretch;
+    padding: 10px;
+  }
+  .profile-banner {
+    align-items: start;
+  }
+  .profile-avatar {
+    flex: 0 0 auto;
+  }
+  .profile-action {
+    width: 100%;
+  }
   .case-grid {
     grid-template-columns: 1fr;
   }
@@ -831,6 +851,10 @@ body {
   .hospital-item-meta {
     text-align: left;
     min-width: 0;
+  }
+  .hospital-item-main strong,
+  .hospital-item-main span {
+    white-space: normal;
   }
 }
 

@@ -107,6 +107,16 @@ const seedFacilities = [
   { name: 'Apotek K-24 Braga', latlng: [-6.9158, 107.6079], tags: { amenity: 'pharmacy', healthcare: 'pharmacy', services: ['umum'] }, city: 'Bandung' },
   { name: 'Bidan Mandiri Sejahtera', latlng: [-0.9506, 100.3533], tags: { healthcare: 'midwife', services: ['ibu', 'anak'] }, city: 'Padang' },
   { name: 'Dokter Gigi Ceria Dental', latlng: [-5.1369, 119.4312], tags: { amenity: 'dentist', healthcare: 'dentist', services: ['umum'] }, city: 'Makassar' },
+  { name: 'RSUP Dr. Kariadi Unit Gawat Darurat', latlng: [-6.9878, 110.4098], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum'] }, city: 'Semarang' },
+  { name: 'RSUD dr. Soekardjo', latlng: [-7.3433, 108.2238], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum'] }, city: 'Tasikmalaya' },
+  { name: 'RSUP Dr. M. Djamil IGD', latlng: [-0.9484, 100.3524], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'trauma'] }, city: 'Padang' },
+  { name: 'RSU Haji Surabaya', latlng: [-7.3108, 112.7448], tags: { amenity: 'hospital', healthcare: 'hospital', emergency: 'yes', services: ['igd', 'umum', 'ibu'] }, city: 'Surabaya' },
+  { name: 'Puskesmas Mulyorejo', latlng: [-7.2727, 112.7934], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'anak'] }, city: 'Surabaya' },
+  { name: 'Puskesmas Gedongtengen', latlng: [-7.7911, 110.3638], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum'] }, city: 'Yogyakarta' },
+  { name: 'Klinik Utama Sehat Sentosa', latlng: [-6.2104, 106.8451], tags: { amenity: 'clinic', healthcare: 'clinic', emergency: 'yes', services: ['umum', 'ibu', 'anak'] }, city: 'Jakarta' },
+  { name: 'Apotek Sejahtera 24 Jam', latlng: [-7.2647, 112.7487], tags: { amenity: 'pharmacy', healthcare: 'pharmacy', services: ['umum'] }, city: 'Surabaya' },
+  { name: 'Bidan Kasih Ibu', latlng: [-6.8947, 107.6129], tags: { healthcare: 'midwife', services: ['ibu', 'anak'] }, city: 'Bandung' },
+  { name: 'Smile Dental Clinic Bandung', latlng: [-6.9039, 107.6116], tags: { amenity: 'dentist', healthcare: 'dentist', services: ['umum'] }, city: 'Bandung' },
 ];
 
 const hospitalKeywords = {
@@ -149,7 +159,7 @@ function openProfileModal(facility) {
   profileServices.textContent = facility.source === 'overpass'
     ? [facility.tags?.amenity, facility.tags?.healthcare].filter(Boolean).join(' • ') || 'Fasilitas medis'
     : (facility.tags?.services || ['umum']).join(' • ');
-  profileAddress.textContent = facility.city || regionSuggestions[facility.region]?.label || 'Lokasi terdeteksi dari peta';
+  profileAddress.textContent = `${facility.city || regionSuggestions[facility.region]?.label || 'Lokasi terdeteksi dari peta'}${facility.source === 'overpass' ? ' • OpenStreetMap' : ''}`;
   profileAction.href = `https://www.google.com/maps/search/?api=1&query=${facility.latlng[0]},${facility.latlng[1]}`;
   profileModal.hidden = false;
 }
