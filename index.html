@@ -100,14 +100,55 @@
           <div class="filter-bar filter-bar-secondary">
             <select id="regionFilter" class="filter-select" aria-label="Filter wilayah">
               <option value="auto">Ikuti lokasi saya</option>
+              <option value="seluruh">Seluruh Indonesia</option>
+              <option value="aceh">Aceh</option>
+              <option value="sumut">Sumatera Utara</option>
+              <option value="sumbar">Sumatera Barat</option>
+              <option value="riau">Riau</option>
+              <option value="jambi">Jambi</option>
+              <option value="sumsel">Sumatera Selatan</option>
+              <option value="bengkulu">Bengkulu</option>
+              <option value="lampung">Lampung</option>
+              <option value="babel">Bangka Belitung</option>
+              <option value="kepri">Kepulauan Riau</option>
               <option value="jakarta">Jakarta</option>
+              <option value="banten">Banten</option>
               <option value="bandung">Bandung</option>
+              <option value="jabar">Jawa Barat</option>
+              <option value="dki">DKI Jakarta</option>
+              <option value="diy">DI Yogyakarta</option>
+              <option value="jateng">Jawa Tengah</option>
+              <option value="jatim">Jawa Timur</option>
               <option value="semarang">Semarang</option>
               <option value="surabaya">Surabaya</option>
               <option value="yogyakarta">Yogyakarta</option>
               <option value="solo">Surakarta / Solo</option>
               <option value="medan">Medan</option>
               <option value="makassar">Makassar</option>
+              <option value="padang">Padang</option>
+              <option value="pontianak">Pontianak</option>
+              <option value="palangkaraya">Palangka Raya</option>
+              <option value="banjarmasin">Banjarmasin</option>
+              <option value="samarinda">Samarinda</option>
+              <option value="kalut">Kalimantan Utara</option>
+              <option value="kalbar">Kalimantan Barat</option>
+              <option value="kalteng">Kalimantan Tengah</option>
+              <option value="kalsel">Kalimantan Selatan</option>
+              <option value="kaltim">Kalimantan Timur</option>
+              <option value="manado">Manado</option>
+              <option value="sulut">Sulawesi Utara</option>
+              <option value="gorontalo">Gorontalo</option>
+              <option value="sulteng">Sulawesi Tengah</option>
+              <option value="sulsel">Sulawesi Selatan</option>
+              <option value="sultra">Sulawesi Tenggara</option>
+              <option value="sulbar">Sulawesi Barat</option>
+              <option value="bali">Bali</option>
+              <option value="ntb">Nusa Tenggara Barat</option>
+              <option value="ntt">Nusa Tenggara Timur</option>
+              <option value="maluku">Maluku</option>
+              <option value="malut">Maluku Utara</option>
+              <option value="papua_barat">Papua Barat</option>
+              <option value="papua">Papua</option>
               <option value="denpasar">Denpasar</option>
             </select>
           </div>
@@ -116,7 +157,7 @@
         </div>
       </div>
       <div class="profile-modal" id="profileModal" hidden>
-        <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileName">
+          <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileName">
           <button class="profile-close" id="profileCloseBtn" aria-label="Tutup">&times;</button>
           <div class="profile-banner">
             <div class="profile-avatar" id="profileBadge">RS</div>
@@ -124,19 +165,29 @@
               <p class="eyebrow">Profil fasilitas</p>
               <h2 id="profileName">Rumah Sakit</h2>
               <p id="profileDistance">Jarak</p>
+              <div class="profile-chips">
+                <span class="profile-chip" id="profileTypeChip">-</span>
+                <span class="profile-chip profile-chip-soft" id="profileServicesChip">-</span>
+              </div>
             </div>
           </div>
-          <div class="profile-block">
-            <span class="profile-label">Jenis</span>
-            <strong id="profileTypeLabel">-</strong>
-          </div>
-          <div class="profile-block">
-            <span class="profile-label">Layanan</span>
-            <strong id="profileServices">-</strong>
+          <div class="profile-grid">
+            <div class="profile-block">
+              <span class="profile-label">Jenis</span>
+              <strong id="profileTypeLabel">-</strong>
+            </div>
+            <div class="profile-block">
+              <span class="profile-label">Layanan</span>
+              <strong id="profileServices">-</strong>
+            </div>
           </div>
           <div class="profile-block">
             <span class="profile-label">Alamat / Area</span>
             <strong id="profileAddress">-</strong>
+          </div>
+          <div class="profile-block">
+            <span class="profile-label">Prioritas</span>
+            <strong id="profilePriority">Rute terdekat</strong>
           </div>
           <a class="profile-action" id="profileAction" href="#" target="_blank" rel="noopener noreferrer">Buka di Google Maps</a>
         </div>
