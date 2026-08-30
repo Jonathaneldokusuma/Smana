@@ -125,6 +125,20 @@ body {
   color: #d9fff0;
 }
 
+.hud-pill-gps.is-active::before,
+.hud-pill-gps.is-waiting::before,
+.hud-pill-gps.is-error::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  vertical-align: middle;
+  animation: gps-beat 1.2s ease-in-out infinite;
+}
+
 .hud-pill-gps.is-waiting {
   background: rgba(255, 195, 92, 0.12);
   border-color: rgba(255, 195, 92, 0.24);
@@ -135,6 +149,16 @@ body {
   background: rgba(255, 107, 107, 0.12);
   border-color: rgba(255, 107, 107, 0.22);
   color: #ffd0d0;
+}
+
+.hud-btn.is-off {
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.58);
+}
+
+@keyframes gps-beat {
+  0%, 100% { transform: scale(0.82); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 1; }
 }
 
 .geo-error {
@@ -741,23 +765,36 @@ body {
 
 @media (max-width: 640px) {
   .hud {
-    right: 16px;
-    left: 16px;
+    right: 12px;
+    left: 12px;
+    top: 12px;
+    gap: 8px;
+    padding: 10px;
     flex-wrap: wrap;
+    align-items: stretch;
+  }
+  .hud-btn {
+    padding: 10px 12px;
+    font-size: 0.92rem;
   }
   .hud-pill {
     width: 100%;
+    text-align: center;
+    padding: 8px 10px;
+  }
+  .hud-pill-gps {
+    justify-content: center;
   }
   .case-card,
   .filter-card,
   .profile-card,
   .call-card {
     width: 100%;
-    max-height: 88vh;
+    max-height: 90vh;
   }
   .profile-modal {
     place-items: end stretch;
-    padding: 10px;
+    padding: 8px;
   }
   .profile-banner {
     align-items: start;
@@ -778,8 +815,8 @@ body {
     grid-template-columns: 1fr;
   }
   .zoom-stack {
-    right: 12px;
-    bottom: 92px;
+    right: 10px;
+    bottom: 110px;
   }
   .filter-bar {
     grid-template-columns: 1fr;
@@ -795,6 +832,19 @@ body {
   .hospital-item-main strong,
   .hospital-item-main span {
     white-space: normal;
+  }
+  .location-hint,
+  .geo-error {
+    left: 12px;
+    right: 12px;
+    max-width: none;
+    bottom: 12px;
+  }
+  .location-hint {
+    bottom: 84px;
+  }
+  .geo-error {
+    bottom: 84px;
   }
 }
 

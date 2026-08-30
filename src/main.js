@@ -3,6 +3,7 @@ const locBtn = document.getElementById('locBtn');
 const caseBtn = document.getElementById('caseBtn');
 const filterBtn = document.getElementById('filterBtn');
 const callBtn = document.getElementById('callBtn');
+const trackingBtn = document.getElementById('trackingBtn');
 const callModal = document.getElementById('callModal');
 const callCloseBtn = document.getElementById('callCloseBtn');
 const callPhoneBtn = document.getElementById('callPhoneBtn');
@@ -287,6 +288,8 @@ let facilityCache = [];
 let facilityCacheKey = '';
 let trackingRetryTimer = null;
 let trackingStarted = false;
+let trackingEnabled = true;
+let trackingWatchId = null;
 
 const fallbackCenter = [-7.5566, 110.8205];
 
@@ -1009,12 +1012,14 @@ function initMap() {
 }
 
 function startTracking() {
-  if (trackingStarted) return;
+  if (trackingStarted || !trackingEnabled) return;
   trackingStarted = true;
   if (!navigator.geolocation) {
     showError('Browser Anda tidak mendukung lokasi.');
     showLocationHint('Browser Anda tidak mendukung lokasi otomatis.');
     setGpsState('is-error', 'GPS: tidak didukung');
+    trackingBtn.textContent = 'Tracking mati';
+    trackingBtn.classList.add('is-off');
     return;
   }
   setGpsState('is-waiting', 'GPS: meminta izin');
@@ -1029,7 +1034,7 @@ function startTracking() {
     },
     { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
   );
-  navigator.geolocation.watchPosition(
+  trackingWatchId = navigator.geolocation.watchPosition(
     setUserPosition,
     () => {
       showError('Izin lokasi belum aktif.');
@@ -1041,6 +1046,7 @@ function startTracking() {
   );
   if (trackingRetryTimer) clearInterval(trackingRetryTimer);
   trackingRetryTimer = setInterval(() => {
+    if (!trackingEnabled) return;
     if (lastPosition) {
       setGpsState('is-active', 'GPS: aktif');
       clearInterval(trackingRetryTimer);
@@ -1058,12 +1064,42 @@ function startTracking() {
   }, 8000);
 }
 
+function stopTracking() {
+  trackingEnabled = false;
+  trackingStarted = false;
+  followUser = false;
+  if (trackingWatchId !== null && navigator.geolocation?.clearWatch) {
+    navigator.geolocation.clearWatch(trackingWatchId);
+    trackingWatchId = null;
+  }
+  if (trackingRetryTimer) {
+    clearInterval(trackingRetryTimer);
+    trackingRetryTimer = null;
+  }
+  setGpsState('is-error', 'GPS: dimatikan');
+  trackingBtn.textContent = 'Tracking mati';
+  trackingBtn.classList.add('is-off');
+  showLocationHint('Tracking dimatikan. Aktifkan lagi untuk melacak lokasi Anda otomatis.');
+}
+
+function enableTracking() {
+  trackingEnabled = true;
+  trackingStarted = false;
+  trackingBtn.textContent = 'Tracking aktif';
+  trackingBtn.classList.remove('is-off');
+  startTracking();
+}
+
 centerBtn.addEventListener('click', () => {
   followUser = true;
   map.flyTo(lastPosition || fallbackCenter, Math.max(map.getZoom(), 15), { duration: 0.5 });
 });
 
 locBtn.addEventListener('click', () => navigator.geolocation?.getCurrentPosition(setUserPosition, () => showError('Akses lokasi ditolak.'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }));
+trackingBtn.addEventListener('click', () => {
+  if (trackingEnabled) stopTracking();
+  else enableTracking();
+});
 locationRetryBtn.addEventListener('click', () => {
   hideError();
   showLocationHint('Membuka permintaan izin lokasi lagi...');
