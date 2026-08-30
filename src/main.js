@@ -278,6 +278,7 @@ let lastPosition = null;
 let activeCase = 'igd';
 let activeHospital = soloHospitals[0];
 let followUser = true;
+let hasCenteredOnUser = false;
 let hospitalMarkers = [];
 let facilityCache = [];
 let facilityCacheKey = '';
@@ -904,7 +905,13 @@ function setUserPosition(position) {
   ambulanceMarker.setLatLng(next);
   userHalo.setLatLng(next);
   userDot.setLatLng(next);
-  if (followUser) map.panTo(next, { animate: true, duration: 0.5 });
+  if (!hasCenteredOnUser) {
+    hasCenteredOnUser = true;
+    followUser = true;
+    map.setView(next, Math.max(map.getZoom(), 15), { animate: true });
+  } else if (followUser) {
+    map.panTo(next, { animate: true, duration: 0.5 });
+  }
   setStatus(`Lokasi Anda • akurasi ±${Math.round(accuracy)} m`);
   refreshFacilities(next).catch(() => {});
 }
