@@ -222,10 +222,14 @@ body {
   padding: 20px;
   background: rgba(2, 8, 18, 0.56);
   backdrop-filter: blur(10px);
+  transition: opacity 0.22s ease, visibility 0.22s ease;
 }
 
 .case-modal[hidden] {
-  display: none !important;
+  display: grid !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .filter-modal {
@@ -237,10 +241,14 @@ body {
   padding: 20px;
   background: rgba(2, 8, 18, 0.58);
   backdrop-filter: blur(10px);
+  transition: opacity 0.22s ease, visibility 0.22s ease;
 }
 
 .filter-modal[hidden] {
-  display: none !important;
+  display: grid !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 
@@ -258,6 +266,7 @@ body {
   padding: 20px;
   background: rgba(2, 8, 18, 0.58);
   backdrop-filter: blur(10px);
+  transition: opacity 0.22s ease, visibility 0.22s ease;
 }
 
 .call-card {
@@ -324,6 +333,13 @@ body {
   cursor: pointer;
 }
 
+.call-modal[hidden] {
+  display: grid !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .case-card {
   position: relative;
   width: min(720px, 100%);
@@ -356,6 +372,7 @@ body {
     linear-gradient(180deg, rgba(8, 12, 20, 0.98), rgba(4, 8, 14, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  transition: transform 0.24s ease, opacity 0.24s ease;
 }
 
 .sheet-handle {
@@ -364,6 +381,17 @@ body {
 
 .mobile-nav {
   display: none;
+}
+
+.profile-modal {
+  transition: opacity 0.22s ease, visibility 0.22s ease;
+}
+
+.profile-modal[hidden] {
+  display: grid !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .profile-banner {
@@ -780,22 +808,32 @@ body {
     right: 12px;
     left: 12px;
     top: 12px;
-    gap: 8px;
-    padding: 10px;
+    gap: 6px;
+    padding: 8px;
     flex-wrap: wrap;
     align-items: stretch;
+    border-radius: 16px;
   }
   .hud-btn {
-    padding: 10px 12px;
-    font-size: 0.92rem;
+    padding: 8px 10px;
+    font-size: 0.8rem;
   }
   .hud-pill {
     width: 100%;
     text-align: center;
-    padding: 8px 10px;
+    padding: 7px 9px;
+    font-size: 0.78rem;
   }
   .hud-pill-gps {
     justify-content: center;
+  }
+  .hud .hud-btn {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .hud .hud-btn-accent {
+    width: 100%;
+    order: 20;
   }
   .case-card,
   .filter-card,
@@ -809,22 +847,23 @@ body {
   .call-modal,
   .profile-modal {
     align-items: end;
-    padding: 8px;
+    padding: 6px;
   }
   .case-card,
   .filter-card,
   .call-card,
   .profile-card {
-    border-radius: 24px 24px 18px 18px;
-    max-height: min(84vh, 900px);
+    border-radius: 24px 24px 16px 16px;
+    max-height: 82vh;
     overflow: auto;
+    transform: translateY(14px);
   }
   .profile-modal {
     place-items: end stretch;
   }
   .profile-card {
     width: 100%;
-    padding: 16px;
+    padding: 14px;
   }
   .profile-banner {
     align-items: start;
@@ -834,12 +873,12 @@ body {
     flex: 0 0 auto;
   }
   .profile-avatar {
-    width: 72px;
-    height: 72px;
-    font-size: 1.35rem;
+    width: 68px;
+    height: 68px;
+    font-size: 1.25rem;
   }
   .profile-banner-copy h2 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     line-height: 1.1;
   }
   .profile-banner-copy p {
@@ -862,7 +901,7 @@ body {
     grid-template-columns: 1fr;
   }
   .case-item {
-    padding: 14px;
+    padding: 12px;
   }
   .call-actions {
     grid-template-columns: 1fr;
@@ -870,18 +909,19 @@ body {
   .call-card,
   .case-card,
   .filter-card {
-    padding: 18px;
+    padding: 16px;
   }
   .filter-summary {
     font-size: 0.92rem;
   }
   .zoom-stack {
     right: 10px;
-    bottom: 88px;
+    bottom: 78px;
   }
   .zoom-btn {
-    width: 46px;
-    height: 46px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
   }
   .filter-bar {
     grid-template-columns: 1fr;
@@ -919,10 +959,10 @@ body {
     bottom: 12px;
   }
   .location-hint {
-    bottom: 84px;
+    bottom: 76px;
   }
   .geo-error {
-    bottom: 84px;
+    bottom: 76px;
   }
   .map-pin svg {
     width: 48px;
@@ -930,15 +970,15 @@ body {
   }
   .mobile-nav {
     position: absolute;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
     z-index: 1250;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    padding: 10px;
-    border-radius: 20px;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 18px;
     background: rgba(5, 8, 15, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: var(--shadow);
@@ -946,11 +986,11 @@ body {
   }
   .mobile-nav-btn {
     border: 0;
-    border-radius: 14px;
-    padding: 10px 8px;
+    border-radius: 12px;
+    padding: 8px 6px;
     background: rgba(255, 255, 255, 0.06);
     color: var(--text);
-    font-size: 0.84rem;
+    font-size: 0.74rem;
     font-weight: 800;
     cursor: pointer;
   }
@@ -973,6 +1013,11 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
+  }
+  .mobile-nav-btn:active,
+  .hud-btn:active,
+  .zoom-btn:active {
+    transform: scale(0.98);
   }
 }
 
