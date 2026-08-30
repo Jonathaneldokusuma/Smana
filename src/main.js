@@ -1001,6 +1001,16 @@ function startTracking() {
     showLocationHint('Browser Anda tidak mendukung lokasi otomatis.');
     return;
   }
+  showLocationHint('Meminta izin lokasi untuk memulai pelacakan otomatis...');
+  navigator.geolocation.getCurrentPosition(
+    setUserPosition,
+    () => {
+      showError('Izin lokasi belum aktif.');
+      setStatus('Menunggu izin lokasi');
+      showLocationHint('Aktifkan izin lokasi di browser agar posisi Anda bisa dilacak.');
+    },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
+  );
   navigator.geolocation.watchPosition(
     setUserPosition,
     () => {
@@ -1111,7 +1121,6 @@ startTracking();
 renderHospitalList();
 caseModal.hidden = false;
 setStatus('Pilih kondisi pasien');
-showLocationHint();
 
 
 
