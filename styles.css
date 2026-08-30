@@ -792,38 +792,104 @@ body {
     width: 100%;
     max-height: 90vh;
   }
+  .case-modal,
+  .filter-modal,
+  .call-modal,
+  .profile-modal {
+    align-items: end;
+    padding: 8px;
+  }
+  .case-card,
+  .filter-card,
+  .call-card,
+  .profile-card {
+    border-radius: 24px 24px 18px 18px;
+    max-height: min(84vh, 900px);
+    overflow: auto;
+  }
   .profile-modal {
     place-items: end stretch;
-    padding: 8px;
+  }
+  .profile-card {
+    width: 100%;
+    padding: 16px;
   }
   .profile-banner {
     align-items: start;
+    gap: 12px;
   }
   .profile-avatar {
     flex: 0 0 auto;
   }
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 1.35rem;
+  }
+  .profile-banner-copy h2 {
+    font-size: 1.3rem;
+    line-height: 1.1;
+  }
+  .profile-banner-copy p {
+    margin-bottom: 8px;
+  }
   .profile-grid {
     grid-template-columns: 1fr;
   }
+  .profile-block {
+    padding: 14px;
+  }
+  .profile-label {
+    font-size: 0.76rem;
+  }
   .profile-action {
     width: 100%;
+    margin-top: 8px;
   }
   .case-grid {
     grid-template-columns: 1fr;
   }
+  .case-item {
+    padding: 14px;
+  }
   .call-actions {
     grid-template-columns: 1fr;
+  }
+  .call-card,
+  .case-card,
+  .filter-card {
+    padding: 18px;
+  }
+  .filter-summary {
+    font-size: 0.92rem;
   }
   .zoom-stack {
     right: 10px;
     bottom: 110px;
   }
+  .zoom-btn {
+    width: 46px;
+    height: 46px;
+  }
   .filter-bar {
     grid-template-columns: 1fr;
+  }
+  .filter-input,
+  .filter-select {
+    width: 100%;
+    font-size: 0.96rem;
   }
   .hospital-item {
     align-items: start;
     flex-direction: column;
+  }
+  .hospital-item {
+    padding: 14px;
+  }
+  .hospital-item-badge {
+    min-width: 52px;
+    height: 52px;
+    font-size: 1.05rem;
   }
   .hospital-item-meta {
     text-align: left;
@@ -845,6 +911,10 @@ body {
   }
   .geo-error {
     bottom: 84px;
+  }
+  .map-pin svg {
+    width: 48px;
+    height: 48px;
   }
 }
 
