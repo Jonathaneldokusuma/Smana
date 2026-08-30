@@ -1191,6 +1191,11 @@ callCloseBtn.addEventListener('click', (event) => { event.preventDefault(); even
 callModal.addEventListener('click', (event) => { if (event.target === callModal) closeCallModal(); });
 
 callPhoneBtn.addEventListener('click', () => {
+  const confirmed = window.confirm('Peringatan: Anda akan langsung menelepon 119. Lanjutkan?');
+  if (!confirmed) {
+    setStatus('Panggilan dibatalkan');
+    return;
+  }
   setStatus('Mempersiapkan panggilan telepon...');
   closeCallModal();
   window.location.href = 'tel:119';
