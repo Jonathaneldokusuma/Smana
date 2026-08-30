@@ -35,6 +35,12 @@
         <span class="hud-pill" id="statusPill">Mencari lokasi...</span>
         <span class="hud-pill hud-pill-gps" id="gpsPill">GPS: menunggu</span>
       </div>
+      <nav class="mobile-nav" aria-label="Navigasi cepat">
+        <button class="mobile-nav-btn" id="mobileCenterBtn" type="button">Pusatkan</button>
+        <button class="mobile-nav-btn" id="mobileLocBtn" type="button">Lokasi</button>
+        <button class="mobile-nav-btn mobile-nav-btn-primary" id="mobileCallBtn" type="button">Ambulans</button>
+        <button class="mobile-nav-btn" id="mobileFilterBtn" type="button">Filter</button>
+      </nav>
       <div class="geo-error" id="geoError" hidden></div>
       <div class="location-hint" id="locationHint" hidden>
         <strong>Lokasi belum aktif</strong>
@@ -164,7 +170,8 @@
         </div>
       </div>
       <div class="profile-modal" id="profileModal" hidden>
-          <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileName">
+          <div class="profile-card" id="profileCard" role="dialog" aria-modal="true" aria-labelledby="profileName">
+          <div class="sheet-handle" aria-hidden="true"></div>
           <button class="profile-close" id="profileCloseBtn" aria-label="Tutup">&times;</button>
           <div class="profile-banner">
             <div class="profile-avatar" id="profileBadge">RS</div>

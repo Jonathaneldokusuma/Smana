@@ -4,6 +4,10 @@ const caseBtn = document.getElementById('caseBtn');
 const filterBtn = document.getElementById('filterBtn');
 const callBtn = document.getElementById('callBtn');
 const trackingBtn = document.getElementById('trackingBtn');
+const mobileCenterBtn = document.getElementById('mobileCenterBtn');
+const mobileLocBtn = document.getElementById('mobileLocBtn');
+const mobileCallBtn = document.getElementById('mobileCallBtn');
+const mobileFilterBtn = document.getElementById('mobileFilterBtn');
 const callModal = document.getElementById('callModal');
 const callCloseBtn = document.getElementById('callCloseBtn');
 const callPhoneBtn = document.getElementById('callPhoneBtn');
@@ -18,6 +22,7 @@ const caseCloseBtn = document.getElementById('caseCloseBtn');
 const filterModal = document.getElementById('filterModal');
 const filterCloseBtn = document.getElementById('filterCloseBtn');
 const profileModal = document.getElementById('profileModal');
+const profileCard = document.getElementById('profileCard');
 const profileCloseBtn = document.getElementById('profileCloseBtn');
 const profileName = document.getElementById('profileName');
 const profileBadge = document.getElementById('profileBadge');
@@ -290,6 +295,8 @@ let trackingRetryTimer = null;
 let trackingStarted = false;
 let trackingEnabled = true;
 let trackingWatchId = null;
+let profileTouchStartY = 0;
+let profileTouchEndY = 0;
 
 const fallbackCenter = [-7.5566, 110.8205];
 
@@ -333,6 +340,9 @@ function openProfileModal(facility) {
   profileModal.hidden = false;
 }
 function closeProfileModal() { profileModal.hidden = true; }
+function openProfileModalWithSwipeGuard(facility) {
+  openProfileModal(facility);
+}
 
 function getCurrentPosition() {
   return new Promise((resolve, reject) => {
@@ -1100,6 +1110,10 @@ trackingBtn.addEventListener('click', () => {
   if (trackingEnabled) stopTracking();
   else enableTracking();
 });
+mobileCenterBtn.addEventListener('click', () => centerBtn.click());
+mobileLocBtn.addEventListener('click', () => locBtn.click());
+mobileCallBtn.addEventListener('click', () => callBtn.click());
+mobileFilterBtn.addEventListener('click', () => filterBtn.click());
 locationRetryBtn.addEventListener('click', () => {
   hideError();
   showLocationHint('Membuka permintaan izin lokasi lagi...');
@@ -1124,6 +1138,17 @@ filterCloseBtn.addEventListener('click', (event) => { event.preventDefault(); ev
 filterModal.addEventListener('click', (e) => { if (e.target === filterModal) closeFilterModal(); });
 profileCloseBtn.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); closeProfileModal(); });
 profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfileModal(); });
+profileCard?.addEventListener('touchstart', (event) => {
+  profileTouchStartY = event.touches[0].clientY;
+  profileTouchEndY = profileTouchStartY;
+}, { passive: true });
+profileCard?.addEventListener('touchmove', (event) => {
+  profileTouchEndY = event.touches[0].clientY;
+}, { passive: true });
+profileCard?.addEventListener('touchend', () => {
+  const delta = profileTouchEndY - profileTouchStartY;
+  if (delta > 80) closeProfileModal();
+});
 
 hospitalSearch.addEventListener('input', () => {
   renderHospitalList();

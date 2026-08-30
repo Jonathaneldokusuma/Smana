@@ -28,6 +28,7 @@ body {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100svh;
   background: #000000;
 }
 
@@ -355,6 +356,14 @@ body {
     linear-gradient(180deg, rgba(8, 12, 20, 0.98), rgba(4, 8, 14, 0.98));
   border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.sheet-handle {
+  display: none;
+}
+
+.mobile-nav {
+  display: none;
 }
 
 .profile-banner {
@@ -764,6 +773,9 @@ body {
 }
 
 @media (max-width: 640px) {
+  .app-shell {
+    height: 100svh;
+  }
   .hud {
     right: 12px;
     left: 12px;
@@ -865,7 +877,7 @@ body {
   }
   .zoom-stack {
     right: 10px;
-    bottom: 110px;
+    bottom: 88px;
   }
   .zoom-btn {
     width: 46px;
@@ -915,6 +927,52 @@ body {
   .map-pin svg {
     width: 48px;
     height: 48px;
+  }
+  .mobile-nav {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 1250;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+    border-radius: 20px;
+    background: rgba(5, 8, 15, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+  }
+  .mobile-nav-btn {
+    border: 0;
+    border-radius: 14px;
+    padding: 10px 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    font-size: 0.84rem;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .mobile-nav-btn-primary {
+    background: rgba(67, 224, 180, 0.16);
+    border: 1px solid rgba(67, 224, 180, 0.22);
+  }
+  .profile-card {
+    touch-action: pan-y;
+  }
+  .sheet-handle {
+    display: block;
+    width: 46px;
+    height: 5px;
+    margin: 0 auto 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+  }
+  .profile-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
   }
 }
 
