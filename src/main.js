@@ -34,6 +34,8 @@ const facilityFilter = document.getElementById('facilityFilter');
 const regionFilter = document.getElementById('regionFilter');
 const hospitalList = document.getElementById('hospitalList');
 const filterSummary = document.getElementById('filterSummary');
+const locationHint = document.getElementById('locationHint');
+const locationRetryBtn = document.getElementById('locationRetryBtn');
 
 const overpassEndpoint = 'https://overpass-api.de/api/interpreter';
 const regionSuggestions = {
@@ -288,6 +290,11 @@ const fallbackCenter = [-7.5566, 110.8205];
 function setStatus(text) { statusPill.textContent = text; }
 function showError(text) { geoError.textContent = text; geoError.hidden = false; }
 function hideError() { geoError.hidden = true; geoError.textContent = ''; }
+function showLocationHint(message = 'Izinkan akses lokasi agar ambulans melacak posisi Anda secara otomatis.') {
+  locationHint.querySelector('span').textContent = message;
+  locationHint.hidden = false;
+}
+function hideLocationHint() { locationHint.hidden = true; }
 function openCallModal() { callModal.hidden = false; }
 function closeCallModal() { callModal.hidden = true; }
 function openFilterModal() { filterModal.hidden = false; renderHospitalList(); }
@@ -905,6 +912,8 @@ function setUserPosition(position) {
   ambulanceMarker.setLatLng(next);
   userHalo.setLatLng(next);
   userDot.setLatLng(next);
+  hideLocationHint();
+  hideError();
   if (!hasCenteredOnUser) {
     hasCenteredOnUser = true;
     followUser = true;
@@ -989,6 +998,7 @@ function initMap() {
 function startTracking() {
   if (!navigator.geolocation) {
     showError('Browser Anda tidak mendukung lokasi.');
+    showLocationHint('Browser Anda tidak mendukung lokasi otomatis.');
     return;
   }
   navigator.geolocation.watchPosition(
@@ -996,6 +1006,7 @@ function startTracking() {
     () => {
       showError('Izin lokasi belum aktif.');
       setStatus('Menunggu izin lokasi');
+      showLocationHint('Aktifkan izin lokasi di browser agar posisi Anda bisa dilacak.');
     },
     { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
   );
@@ -1007,6 +1018,18 @@ centerBtn.addEventListener('click', () => {
 });
 
 locBtn.addEventListener('click', () => navigator.geolocation?.getCurrentPosition(setUserPosition, () => showError('Akses lokasi ditolak.'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }));
+locationRetryBtn.addEventListener('click', () => {
+  hideError();
+  showLocationHint('Membuka permintaan izin lokasi lagi...');
+  navigator.geolocation?.getCurrentPosition(
+    setUserPosition,
+    () => {
+      showError('Akses lokasi ditolak.');
+      showLocationHint('Akses lokasi masih ditolak. Aktifkan dari ikon gembok/permission browser.');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+  );
+});
 
 caseBtn.addEventListener('click', () => { caseModal.hidden = false; });
 filterBtn.addEventListener('click', () => { openFilterModal(); });
@@ -1088,6 +1111,7 @@ startTracking();
 renderHospitalList();
 caseModal.hidden = false;
 setStatus('Pilih kondisi pasien');
+showLocationHint();
 
 
 
