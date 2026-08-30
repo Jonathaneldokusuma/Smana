@@ -36,6 +36,7 @@ const hospitalList = document.getElementById('hospitalList');
 const filterSummary = document.getElementById('filterSummary');
 const locationHint = document.getElementById('locationHint');
 const locationRetryBtn = document.getElementById('locationRetryBtn');
+const gpsPill = document.getElementById('gpsPill');
 
 const overpassEndpoint = 'https://overpass-api.de/api/interpreter';
 const regionSuggestions = {
@@ -284,10 +285,17 @@ let hasCenteredOnUser = false;
 let hospitalMarkers = [];
 let facilityCache = [];
 let facilityCacheKey = '';
+let trackingRetryTimer = null;
+let trackingStarted = false;
 
 const fallbackCenter = [-7.5566, 110.8205];
 
 function setStatus(text) { statusPill.textContent = text; }
+function setGpsState(state, text) {
+  gpsPill.classList.remove('is-active', 'is-waiting', 'is-error');
+  if (state) gpsPill.classList.add(state);
+  gpsPill.textContent = text;
+}
 function showError(text) { geoError.textContent = text; geoError.hidden = false; }
 function hideError() { geoError.hidden = true; geoError.textContent = ''; }
 function showLocationHint(message = 'Izinkan akses lokasi agar ambulans melacak posisi Anda secara otomatis.') {
@@ -914,6 +922,11 @@ function setUserPosition(position) {
   userDot.setLatLng(next);
   hideLocationHint();
   hideError();
+  setGpsState('is-active', 'GPS: aktif');
+  if (trackingRetryTimer) {
+    clearInterval(trackingRetryTimer);
+    trackingRetryTimer = null;
+  }
   if (!hasCenteredOnUser) {
     hasCenteredOnUser = true;
     followUser = true;
@@ -996,11 +1009,15 @@ function initMap() {
 }
 
 function startTracking() {
+  if (trackingStarted) return;
+  trackingStarted = true;
   if (!navigator.geolocation) {
     showError('Browser Anda tidak mendukung lokasi.');
     showLocationHint('Browser Anda tidak mendukung lokasi otomatis.');
+    setGpsState('is-error', 'GPS: tidak didukung');
     return;
   }
+  setGpsState('is-waiting', 'GPS: meminta izin');
   showLocationHint('Meminta izin lokasi untuk memulai pelacakan otomatis...');
   navigator.geolocation.getCurrentPosition(
     setUserPosition,
@@ -1008,6 +1025,7 @@ function startTracking() {
       showError('Izin lokasi belum aktif.');
       setStatus('Menunggu izin lokasi');
       showLocationHint('Aktifkan izin lokasi di browser agar posisi Anda bisa dilacak.');
+      setGpsState('is-waiting', 'GPS: menunggu izin');
     },
     { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
   );
@@ -1017,9 +1035,27 @@ function startTracking() {
       showError('Izin lokasi belum aktif.');
       setStatus('Menunggu izin lokasi');
       showLocationHint('Aktifkan izin lokasi di browser agar posisi Anda bisa dilacak.');
+      setGpsState('is-error', 'GPS: mati');
     },
     { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 },
   );
+  if (trackingRetryTimer) clearInterval(trackingRetryTimer);
+  trackingRetryTimer = setInterval(() => {
+    if (lastPosition) {
+      setGpsState('is-active', 'GPS: aktif');
+      clearInterval(trackingRetryTimer);
+      trackingRetryTimer = null;
+      return;
+    }
+    setGpsState('is-waiting', 'GPS: coba ulang...');
+    navigator.geolocation.getCurrentPosition(
+      setUserPosition,
+      () => {
+        setGpsState('is-error', 'GPS: belum aktif');
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 },
+    );
+  }, 8000);
 }
 
 centerBtn.addEventListener('click', () => {
@@ -1031,11 +1067,13 @@ locBtn.addEventListener('click', () => navigator.geolocation?.getCurrentPosition
 locationRetryBtn.addEventListener('click', () => {
   hideError();
   showLocationHint('Membuka permintaan izin lokasi lagi...');
+  setGpsState('is-waiting', 'GPS: mencoba lagi');
   navigator.geolocation?.getCurrentPosition(
     setUserPosition,
     () => {
       showError('Akses lokasi ditolak.');
       showLocationHint('Akses lokasi masih ditolak. Aktifkan dari ikon gembok/permission browser.');
+      setGpsState('is-error', 'GPS: ditolak');
     },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
   );

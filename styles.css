@@ -111,6 +111,32 @@ body {
   white-space: nowrap;
 }
 
+.hud-pill-gps {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d8e5f7;
+}
+
+.hud-pill-gps.is-active {
+  background: rgba(67, 224, 180, 0.14);
+  border-color: rgba(67, 224, 180, 0.22);
+  color: #d9fff0;
+}
+
+.hud-pill-gps.is-waiting {
+  background: rgba(255, 195, 92, 0.12);
+  border-color: rgba(255, 195, 92, 0.24);
+  color: #ffe8bd;
+}
+
+.hud-pill-gps.is-error {
+  background: rgba(255, 107, 107, 0.12);
+  border-color: rgba(255, 107, 107, 0.22);
+  color: #ffd0d0;
+}
+
 .geo-error {
   position: absolute;
   left: 16px;
