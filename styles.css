@@ -393,7 +393,14 @@ body {
 }
 
 .profile-modal {
-  z-index: 1200;
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 8, 18, 0.62);
+  backdrop-filter: blur(10px);
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -960,7 +967,9 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   .profile-modal {
-    place-items: end stretch;
+    place-items: center;
+    padding: 10px 10px calc(92px + env(safe-area-inset-bottom, 0px));
+    z-index: 1300;
   }
   .case-modal {
     place-items: center;
@@ -968,6 +977,8 @@ body {
   .profile-card {
     width: 100%;
     padding: 14px;
+    max-height: calc(100dvh - 120px);
+    overflow: auto;
   }
   .profile-banner {
     align-items: start;
@@ -1012,6 +1023,9 @@ body {
     flex: 0 0 76px;
     min-height: 76px;
     scroll-snap-align: start;
+  }
+  .mobile-nav {
+    z-index: 1250;
   }
   .case-grid {
     grid-template-columns: 1fr;

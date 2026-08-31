@@ -533,6 +533,8 @@ function openProfileModal(facility) {
   profilePriority.textContent = priorityLabel;
   profileAction.href = `https://www.google.com/maps/search/?api=1&query=${facility.latlng[0]},${facility.latlng[1]}`;
   profileModal.hidden = false;
+  profileModal.removeAttribute('hidden');
+  profileCard.scrollTop = 0;
   loadProfileGallery(facility);
 }
 
@@ -1065,18 +1067,16 @@ function renderHospitalMarkers() {
   });
 
   picked.slice(0, 25).forEach((hospital) => {
-    const marker = L.marker(hospital.latlng, { icon: createPin(getMarkerLabel(hospital), getMarkerClass(hospital)) }).addTo(map);
-    marker.bindPopup(`
-      <strong>${hospital.name}</strong><br/>
-      ${getFacilityLabel(hospital)}<br/>
-      ${kmText(hospital.distance)} dari titik acuan
-    `);
-    marker.on('click', () => {
-      marker.closePopup();
-      activeHospital = hospital;
-      openProfileModal(hospital);
-    });
-    marker.on('popupopen', () => {
+    const marker = L.marker(hospital.latlng, {
+      icon: createPin(getMarkerLabel(hospital), getMarkerClass(hospital)),
+      bubblingMouseEvents: false,
+      keyboard: true,
+      title: hospital.name,
+    }).addTo(map);
+    marker.on('click keypress', (event) => {
+      if (event.originalEvent?.type === 'keypress' && !['Enter', ' '].includes(event.originalEvent.key)) return;
+      event.originalEvent?.preventDefault();
+      event.originalEvent?.stopPropagation();
       activeHospital = hospital;
       openProfileModal(hospital);
     });
@@ -1218,6 +1218,8 @@ async function refreshFacilities(fromLatLng) {
 }
 
 function initMap() {
+  // Keep dialogs outside Leaflet's transformed panes so they paint immediately on tap.
+  if (profileModal.parentElement !== document.body) document.body.appendChild(profileModal);
   map = L.map('map', {
     zoomControl: false,
     attributionControl: false,
