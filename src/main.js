@@ -341,6 +341,7 @@ let hospitalMarker;
 let userHalo;
 let userDot;
 let routeControl;
+let activeRouteTarget = null;
 let lastPosition = null;
 let activeCase = 'igd';
 let activeHospital = null;
@@ -875,10 +876,10 @@ function matchesCondition(hospital, filterValue) {
 }
 
 function nearestHospital(fromLatLng) {
-  return facilityCache
+  return buildFacilitySource()
     .filter((hospital) => ['Rumah Sakit', 'Puskesmas'].includes(getFacilityLabel(hospital)))
     .map((hospital) => ({ ...hospital, distance: haversineKm(fromLatLng, hospital.latlng), score: facilityScore(hospital) }))
-    .sort((a, b) => (b.score - a.score) || (a.distance - b.distance))[0];
+    .sort((a, b) => (a.distance - b.distance) || (b.score - a.score))[0];
 }
 
 function priorityHospitalWeight(facility) {
@@ -1015,18 +1016,7 @@ function filteredHospitals(source = facilityCache) {
         + regionPreferenceBoost(hospital)
         + nationalPriorityBoost(hospital),
     }))
-    .sort((a, b) => {
-      if (regionFilter.value === 'auto') {
-        return a.distance - b.distance || b.score - a.score;
-      }
-      if (limitedFacilityMode) {
-        return a.distance - b.distance || b.score - a.score;
-      }
-      const aCritical = getFacilityLabel(a) === 'Rumah Sakit' || getFacilityLabel(a) === 'Puskesmas';
-      const bCritical = getFacilityLabel(b) === 'Rumah Sakit' || getFacilityLabel(b) === 'Puskesmas';
-      if (aCritical !== bCritical) return bCritical - aCritical;
-      return b.score - a.score || a.distance - b.distance;
-    });
+    .sort((a, b) => a.distance - b.distance || b.score - a.score);
 }
 
 function buildFacilitySource() {
@@ -1121,8 +1111,10 @@ function renderHospitalList() {
 }
 
 function drawRoute(fromLatLng, toLatLng, hospitalName) {
+  const routeOrigin = lastPosition || fromLatLng;
+  activeRouteTarget = { name: hospitalName, latlng: [...toLatLng] };
   setStatus(`Mencari rute ke ${hospitalName}...`);
-  const waypoints = [L.latLng(fromLatLng[0], fromLatLng[1]), L.latLng(toLatLng[0], toLatLng[1])];
+  const waypoints = [L.latLng(routeOrigin[0], routeOrigin[1]), L.latLng(toLatLng[0], toLatLng[1])];
 
   if (!routeControl) {
     routeControl = L.Routing.control({
@@ -1139,10 +1131,13 @@ function drawRoute(fromLatLng, toLatLng, hospitalName) {
     })
       .on('routesfound', (event) => {
         const route = event.routes?.[0];
-        if (!route) return;
+        const routedWaypoints = route?.inputWaypoints || [];
+        const routedDestination = routedWaypoints[routedWaypoints.length - 1]?.latLng;
+        if (!route || !activeRouteTarget || !routedDestination) return;
+        if (haversineKm([routedDestination.lat, routedDestination.lng], activeRouteTarget.latlng) > 0.1) return;
         const km = (route.summary.totalDistance / 1000).toFixed(1);
         const min = Math.max(1, Math.round(route.summary.totalTime / 60));
-        setStatus(`Menuju ${hospitalName} • ${km} km • ${min} menit`);
+        setStatus(`Menuju ${activeRouteTarget.name} • ${km} km • ${min} menit`);
         hideError();
       })
       .on('routingerror', () => {
@@ -1165,7 +1160,8 @@ function chooseHospital(fromLatLng) {
       if (!nationalMode) return true;
       return ['Rumah Sakit', 'Puskesmas'].includes(getFacilityLabel(hospital));
     })
-    .sort((a, b) => b.score - a.score || a.distance - b.distance)[0] || nearestHospital(fromLatLng);
+    .map((hospital) => ({ ...hospital, distance: haversineKm(fromLatLng, hospital.latlng) }))
+    .sort((a, b) => a.distance - b.distance || b.score - a.score)[0] || nearestHospital(fromLatLng);
   if (!candidate) {
     showError('Data live belum tersedia, memakai data seed nasional.');
     setStatus('Memakai data seed nasional');
