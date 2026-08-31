@@ -886,14 +886,14 @@ body {
   .profile-card,
   .call-card {
     width: 100%;
-    max-height: 90vh;
+    max-height: 92vh;
   }
   .case-modal,
   .filter-modal,
   .call-modal,
   .profile-modal {
     align-items: center;
-    padding: 6px;
+    padding: 6px 6px 96px;
     overflow-y: auto;
   }
   .case-card,
@@ -901,7 +901,7 @@ body {
   .call-card,
   .profile-card {
     border-radius: 24px 24px 16px 16px;
-    max-height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 110px);
     overflow: auto;
     transform: none;
     -webkit-overflow-scrolling: touch;
@@ -955,7 +955,8 @@ body {
     padding: 12px;
   }
   .case-card {
-    max-height: min(82dvh, 720px);
+    width: min(560px, 100%);
+    max-height: min(86dvh, 760px);
     transform: none;
   }
   .call-actions {
@@ -1027,7 +1028,7 @@ body {
     position: absolute;
     left: 10px;
     right: 10px;
-    bottom: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     z-index: 1250;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1068,6 +1069,9 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
+  }
+  .case-modal {
+    padding-bottom: 104px;
   }
   .mobile-nav-btn:active,
   .hud-btn:active,
