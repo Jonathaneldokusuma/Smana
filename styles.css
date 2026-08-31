@@ -1000,6 +1000,18 @@ body {
     width: 100%;
     margin-top: 8px;
   }
+  .profile-gallery-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scroll-snap-type: x proximity;
+  }
+  .profile-gallery-thumb {
+    flex: 0 0 76px;
+    min-height: 76px;
+    scroll-snap-align: start;
+  }
   .case-grid {
     grid-template-columns: 1fr;
   }

@@ -398,11 +398,15 @@ function buildImageSearchTerms(facility) {
   const terms = [];
   const city = facility?.city || regionSuggestions[facility?.region]?.label || '';
   const label = getFacilityLabel(facility);
+  const nameParts = (facility?.name || '').split(/\s+/).filter(Boolean);
   if (facility?.name) terms.push(facility.name);
   if (city) terms.push(`${city} ${label}`.trim());
   if (city) terms.push(`${city} rumah sakit`.trim());
   if (city && label !== 'Rumah Sakit') terms.push(`${city} ${label.toLowerCase()}`.trim());
   if (facility?.region && facility.region !== 'seluruh') terms.push(`${regionSuggestions[facility.region]?.label || facility.region} ${label}`.trim());
+  if (nameParts.length >= 2) terms.push(nameParts.slice(0, 3).join(' '));
+  if (facility?.city && facility?.name) terms.push(`${facility.name} ${facility.city}`);
+  if (/rsud|rumah sakit|hospital/i.test(facility?.name || '')) terms.push(`${city} hospital interior`);
   return [...new Set(terms.filter(Boolean))];
 }
 
@@ -469,6 +473,7 @@ function renderProfileGallery(images, facility) {
     thumb.innerHTML = `<img src="${item.thumbnail}" alt="" loading="lazy" decoding="async" />`;
     thumb.addEventListener('click', () => {
       profileGalleryImage.src = item.url;
+      profileGalleryImage.alt = item.title || `Foto ${facility.name}`;
       profileGalleryStrip.querySelectorAll('.profile-gallery-thumb').forEach((node) => node.classList.remove('is-active'));
       thumb.classList.add('is-active');
     });
