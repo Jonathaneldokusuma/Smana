@@ -418,6 +418,11 @@ function fallbackGalleryImages(facility) {
   ];
 }
 
+function getGalleryPlaceholder(facility, title = 'Mencari foto asli...') {
+  const label = facility?.name || 'Fasilitas medis';
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640"><rect width="100%" height="100%" fill="#0b1220"/><rect x="40" y="40" width="880" height="560" rx="32" fill="#111827" stroke="#243247"/><text x="50%" y="45%" text-anchor="middle" fill="#e5eefb" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="700">${title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text><text x="50%" y="54%" text-anchor="middle" fill="#91a4bd" font-family="Inter,Arial,sans-serif" font-size="22">${label.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text></svg>`)}`;
+}
+
 async function fetchOpenverseImages(facility) {
   const terms = buildImageSearchTerms(facility);
   for (const term of terms) {
@@ -462,7 +467,7 @@ function renderProfileGallery(images, facility) {
   profileGalleryImage.src = items[0].thumbnail || items[0].url;
   profileGalleryImage.alt = `Foto ${facility.name}`;
   profileGalleryImage.onerror = () => {
-    profileGalleryImage.src = items[0].thumbnail || items[0].url;
+    profileGalleryImage.src = getGalleryPlaceholder(facility, 'Foto tidak dapat dimuat');
   };
   profileGalleryStrip.innerHTML = '';
   items.forEach((item, index) => {
@@ -491,7 +496,7 @@ async function loadProfileGallery(facility) {
   }
 
   const requestId = ++facilityImageRequestId;
-  profileGalleryImage.src = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640"><rect width="100%" height="100%" fill="#0b1220"/><text x="50%" y="50%" text-anchor="middle" fill="#91a4bd" font-family="Inter,Arial,sans-serif" font-size="32">Mencari foto asli...</text></svg>')}`;
+  profileGalleryImage.src = getGalleryPlaceholder(facility);
   profileGalleryImage.alt = `Mencari foto asli ${facility.name}`;
   profileGalleryStrip.innerHTML = '';
 
@@ -1068,6 +1073,10 @@ function renderHospitalMarkers() {
     `);
     marker.on('click', () => {
       marker.closePopup();
+      activeHospital = hospital;
+      openProfileModal(hospital);
+    });
+    marker.on('popupopen', () => {
       activeHospital = hospital;
       openProfileModal(hospital);
     });
