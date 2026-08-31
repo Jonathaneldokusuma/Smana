@@ -360,6 +360,9 @@ function setGpsState(state, text) {
   gpsPill.classList.remove('is-active', 'is-waiting', 'is-error');
   if (state) gpsPill.classList.add(state);
   gpsPill.textContent = text;
+  if (state === 'is-active') {
+    hideLocationHint();
+  }
 }
 function showError(text) { geoError.textContent = text; geoError.hidden = false; }
 function hideError() { geoError.hidden = true; geoError.textContent = ''; }
