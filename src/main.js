@@ -1264,11 +1264,6 @@ function initMap() {
   }).addTo(map);
 
   map.on('dragstart', () => { followUser = false; });
-  map.on('zoomend', () => {
-    if (regionFilter.value === 'seluruh' && map.getZoom() <= 5) {
-      map.fitBounds(indonesiaBounds, { padding: [24, 24] });
-    }
-  });
   renderHospitalMarkers();
 }
 
@@ -1429,7 +1424,8 @@ const indonesiaBounds = L.latLngBounds([[-11.5, 94.5], [6.7, 141.5]]);
 
 zoomInBtn.addEventListener('click', () => map.zoomIn());
 zoomOutBtn.addEventListener('click', () => {
-  map.zoomOut();
+  const nextZoom = Math.max(map.getZoom() - 1, map.getMinZoom?.() ?? 5);
+  map.setZoom(nextZoom);
 });
 
 callBtn.addEventListener('click', () => {
