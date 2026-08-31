@@ -369,8 +369,12 @@ function hideError() { geoError.hidden = true; geoError.textContent = ''; }
 function showLocationHint(message = 'Izinkan akses lokasi agar ambulans melacak posisi Anda secara otomatis.') {
   locationHint.querySelector('span').textContent = message;
   locationHint.hidden = false;
+  locationHint.style.display = '';
 }
-function hideLocationHint() { locationHint.hidden = true; }
+function hideLocationHint() {
+  locationHint.hidden = true;
+  locationHint.style.display = 'none';
+}
 function openCallModal() { callModal.hidden = false; }
 function closeCallModal() { callModal.hidden = true; }
 function openFilterModal() { filterModal.hidden = false; renderHospitalList(); }
