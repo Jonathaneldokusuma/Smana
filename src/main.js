@@ -359,7 +359,8 @@ let trackingWatchId = null;
 let profileTouchStartY = 0;
 let profileTouchEndY = 0;
 
-const fallbackCenter = [-7.5566, 110.8205];
+// Neutral map center only; never use a developer location for distance or routing.
+const fallbackCenter = [-2.5, 118.0];
 
 function setStatus(text) { statusPill.textContent = text; }
 function setGpsState(state, text) {
@@ -990,6 +991,7 @@ async function fetchFacilities(fromLatLng) {
 }
 
 function filteredHospitals(source = facilityCache) {
+  if (regionFilter.value === 'auto' && !lastPosition) return [];
   const query = normalize(hospitalSearch.value.trim());
   const condition = conditionFilter.value;
   const facilityType = facilityFilter.value;
@@ -1077,7 +1079,9 @@ function renderHospitalMarkers() {
 function renderHospitalList() {
   const items = filteredHospitals(buildFacilitySource());
   hospitalList.innerHTML = '';
-  filterSummary.textContent = items.length
+  filterSummary.textContent = regionFilter.value === 'auto' && !lastPosition
+    ? 'Menunggu GPS pengguna untuk menghitung fasilitas medis terdekat.'
+    : items.length
     ? `Menampilkan ${items.length} fasilitas medis terdekat untuk ${getConditionLabel(conditionFilter.value)} di ${getRegionLabel()}.`
     : 'Tidak ada fasilitas medis yang cocok dengan filter ini.';
 
@@ -1168,7 +1172,7 @@ function chooseHospital(fromLatLng) {
     return;
   }
   activeHospital = candidate;
-  hospitalMarker.setLatLng(activeHospital.latlng);
+  hospitalMarker.setLatLng(activeHospital.latlng).setOpacity(1);
   drawRoute(fromLatLng, activeHospital.latlng, activeHospital.name);
   renderHospitalList();
 }
@@ -1177,9 +1181,9 @@ function setUserPosition(position) {
   const { latitude, longitude, accuracy } = position.coords;
   const next = [latitude, longitude];
   lastPosition = next;
-  ambulanceMarker.setLatLng(next);
-  userHalo.setLatLng(next);
-  userDot.setLatLng(next);
+  ambulanceMarker.setLatLng(next).setOpacity(1);
+  userHalo.setLatLng(next).setOpacity(1);
+  userDot.setLatLng(next).setOpacity(1);
   hideLocationHint();
   hideError();
   setGpsState('is-active', 'GPS: aktif');
@@ -1222,7 +1226,7 @@ function initMap() {
     scrollWheelZoom: true,
     minZoom: 5,
     maxZoom: 19,
-  }).setView(fallbackCenter, 15);
+  }).setView(fallbackCenter, 5);
 
   const mapHost = document.getElementById('map');
   const fallback = document.createElement('div');
@@ -1250,15 +1254,17 @@ function initMap() {
     }
   }, 4000);
 
-  ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('ambulance', 'map-pin-ambulance') }).addTo(map);
-  hospitalMarker = L.marker(fallbackCenter, { icon: createPin('hospital', 'map-pin-hospital') }).addTo(map);
+  ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('ambulance', 'map-pin-ambulance'), opacity: 0 }).addTo(map);
+  hospitalMarker = L.marker(fallbackCenter, { icon: createPin('hospital', 'map-pin-hospital'), opacity: 0 }).addTo(map);
   userHalo = L.marker(fallbackCenter, {
     icon: L.divIcon({ className: 'current-ring', iconSize: [40, 40], iconAnchor: [20, 20] }),
     interactive: false,
+    opacity: 0,
   }).addTo(map);
   userDot = L.marker(fallbackCenter, {
     icon: L.divIcon({ className: 'current-dot', iconSize: [16, 16], iconAnchor: [8, 8] }),
     interactive: false,
+    opacity: 0,
   }).addTo(map);
 
   map.on('dragstart', () => { followUser = false; });
