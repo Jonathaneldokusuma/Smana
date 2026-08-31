@@ -361,6 +361,7 @@ let profileTouchEndY = 0;
 
 // Neutral map center only; never use a developer location for distance or routing.
 const fallbackCenter = [-2.5, 118.0];
+const maxAutomaticRouteKm = 75;
 
 function setStatus(text) { statusPill.textContent = text; }
 function setGpsState(state, text) {
@@ -1141,7 +1142,7 @@ function drawRoute(fromLatLng, toLatLng, hospitalName) {
         if (haversineKm([routedDestination.lat, routedDestination.lng], activeRouteTarget.latlng) > 0.1) return;
         const km = (route.summary.totalDistance / 1000).toFixed(1);
         const min = Math.max(1, Math.round(route.summary.totalTime / 60));
-        setStatus(`Menuju ${activeRouteTarget.name} • ${km} km • ${min} menit`);
+        setStatus(`Perjalanan ke ${activeRouteTarget.name} • ${km} km • ${min} menit`);
         hideError();
       })
       .on('routingerror', () => {
@@ -1158,17 +1159,23 @@ function drawRoute(fromLatLng, toLatLng, hospitalName) {
 function chooseHospital(fromLatLng) {
   const source = buildFacilitySource();
   const nationalMode = regionFilter.value === 'seluruh';
-  const candidate = filteredHospitals(source)
+  const candidates = filteredHospitals(source)
     .filter((hospital) => serviceMatchesCondition(hospital.tags, hospital.name, activeCase))
     .filter((hospital) => {
       if (!nationalMode) return true;
       return ['Rumah Sakit', 'Puskesmas'].includes(getFacilityLabel(hospital));
     })
     .map((hospital) => ({ ...hospital, distance: haversineKm(fromLatLng, hospital.latlng) }))
-    .sort((a, b) => a.distance - b.distance || b.score - a.score)[0] || nearestHospital(fromLatLng);
+    .sort((a, b) => a.distance - b.distance || b.score - a.score);
+  const nearest = candidates[0] || nearestHospital(fromLatLng);
+  const candidate = nearest?.distance <= maxAutomaticRouteKm ? nearest : null;
   if (!candidate) {
-    showError('Data live belum tersedia, memakai data seed nasional.');
-    setStatus('Memakai data seed nasional');
+    activeHospital = null;
+    activeRouteTarget = null;
+    routeControl?.setWaypoints([]);
+    hospitalMarker.setOpacity(0);
+    showError('Fasilitas lokal belum ditemukan. Jangan gunakan estimasi fasilitas luar kota; hubungi 119 untuk bantuan darurat.');
+    setStatus('Fasilitas lokal belum tersedia • hubungi 119');
     return;
   }
   activeHospital = candidate;
