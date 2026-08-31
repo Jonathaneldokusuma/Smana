@@ -821,6 +821,8 @@ function filteredHospitals(source = facilityCache) {
   const facilityType = facilityFilter.value;
   const base = getRegionBase();
   const nationalMode = regionFilter.value === 'seluruh';
+  const limitedFacilityMode = facilityType !== 'all';
+  const maxRadiusKm = limitedFacilityMode ? 150 : Infinity;
 
   return source
     .filter((hospital) => {
@@ -828,7 +830,9 @@ function filteredHospitals(source = facilityCache) {
       const conditionMatch = matchesCondition(hospital, condition) && serviceMatchesCondition(hospital.tags, hospital.name, condition);
       const facilityMatch = matchesFacilityType(hospital, facilityType);
       const nationalFacilityMatch = !nationalMode || ['hospital', 'puskesmas'].includes(facilityTypeKey(hospital));
-      return nameMatch && conditionMatch && facilityMatch && nationalFacilityMatch;
+      const distance = nationalMode && !lastPosition ? 0 : haversineKm(base, hospital.latlng);
+      const radiusMatch = !Number.isFinite(maxRadiusKm) || distance <= maxRadiusKm;
+      return nameMatch && conditionMatch && facilityMatch && nationalFacilityMatch && radiusMatch;
     })
     .map((hospital) => ({
       ...hospital,
@@ -839,6 +843,9 @@ function filteredHospitals(source = facilityCache) {
         + nationalPriorityBoost(hospital),
     }))
     .sort((a, b) => {
+      if (limitedFacilityMode) {
+        return a.distance - b.distance || b.score - a.score;
+      }
       const aCritical = getFacilityLabel(a) === 'Rumah Sakit' || getFacilityLabel(a) === 'Puskesmas';
       const bCritical = getFacilityLabel(b) === 'Rumah Sakit' || getFacilityLabel(b) === 'Puskesmas';
       if (aCritical !== bCritical) return bCritical - aCritical;
