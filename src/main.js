@@ -683,12 +683,22 @@ function facilityTypeKey(facility) {
 function serviceMatchesCondition(tags = {}, name = '', condition = 'all') {
   if (condition === 'all') return true;
   const value = normalize(name);
-  const services = normalize(`${tags.amenity || ''} ${tags.healthcare || ''} ${tags.emergency || ''}`);
+  const services = normalize(`${tags.amenity || ''} ${tags.healthcare || ''} ${tags.emergency || ''} ${(tags.services || []).join(' ')}`);
   if (condition === 'igd') {
     return services.includes('hospital') || services.includes('clinic') || services.includes('doctors') || services.includes('pharmacy') || value.includes('igd') || value.includes('emergency') || value.includes('rs') || value.includes('puskesmas');
   }
   if (condition === 'trauma') return value.includes('ortopedi') || value.includes('trauma') || services.includes('hospital');
-  if (condition === 'jantung') return value.includes('jantung') || value.includes('cardio') || value.includes('heart');
+  if (condition === 'jantung') {
+    return value.includes('jantung')
+      || value.includes('cardio')
+      || value.includes('heart')
+      || value.includes('kardi')
+      || value.includes('spesialis jantung')
+      || value.includes('penyakit dalam')
+      || services.includes('jantung')
+      || services.includes('cardio')
+      || services.includes('heart');
+  }
   if (condition === 'anak') return value.includes('anak') || value.includes('ibu dan anak') || value.includes('rsia');
   if (condition === 'ibu') return value.includes('ibu') || value.includes('bersalin') || value.includes('maternity') || value.includes('obgyn');
   if (condition === 'umum') return true;
@@ -1181,7 +1191,11 @@ function enableTracking() {
 
 centerBtn.addEventListener('click', () => {
   followUser = true;
-  map.flyTo(lastPosition || fallbackCenter, Math.max(map.getZoom(), 15), { duration: 0.5 });
+  if (lastPosition) {
+    map.flyTo(lastPosition, 17, { duration: 0.5 });
+    return;
+  }
+  locBtn.click();
 });
 
 locBtn.addEventListener('click', () => navigator.geolocation?.getCurrentPosition(setUserPosition, () => showError('Akses lokasi ditolak.'), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }));
