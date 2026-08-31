@@ -319,13 +319,13 @@ function openFilterModal() { filterModal.hidden = false; renderHospitalList(); }
 function closeFilterModal() { filterModal.hidden = true; }
 function openProfileModal(facility) {
   const typeLabel = getFacilityLabel(facility);
-  const sourceLabel = facility.source === 'overpass' ? 'OpenStreetMap' : 'Seed nasional';
+  const sourceLabel = facility.source === 'overpass' ? 'OpenStreetMap' : 'Data lokal';
   const priorityLabel = regionFilter.value === 'seluruh'
     ? 'Diprioritaskan otomatis untuk nasional'
     : `Diprioritaskan untuk ${getConditionLabel(conditionFilter.value).toLowerCase()}`;
   profileName.textContent = facility.name;
   profileBadge.textContent = getMarkerLabel(facility);
-  profileTypeLabel.textContent = `${typeLabel}${facility.source === 'overpass' ? ' • Data live' : ' • Profil demo'}`;
+  profileTypeLabel.textContent = `${typeLabel}${facility.source === 'overpass' ? ' • Data live' : ' • Data lokal'}`;
   profileTypeChip.textContent = typeLabel;
   profileDistance.textContent = `${kmText(facility.distance)} dari lokasi acuan`;
   profileServices.textContent = facility.source === 'overpass'
@@ -647,8 +647,9 @@ function matchesCondition(hospital, filterValue) {
 }
 
 function nearestHospital(fromLatLng) {
-  return [...soloHospitals]
-    .map((hospital) => ({ ...hospital, distance: haversineKm(fromLatLng, hospital.latlng), score: scoreHospital(hospital) }))
+  return facilityCache
+    .filter((hospital) => ['Rumah Sakit', 'Puskesmas'].includes(getFacilityLabel(hospital)))
+    .map((hospital) => ({ ...hospital, distance: haversineKm(fromLatLng, hospital.latlng), score: facilityScore(hospital) }))
     .sort((a, b) => (b.score - a.score) || (a.distance - b.distance))[0];
 }
 
@@ -754,12 +755,12 @@ async function fetchFacilities(fromLatLng) {
     })
     .filter(Boolean);
 
-  facilityCache = [...seedFacilities, ...facilities];
+  facilityCache = facilities;
   facilityCacheKey = cacheKey;
   return facilityCache;
 }
 
-function filteredHospitals(source = soloHospitals) {
+function filteredHospitals(source = facilityCache) {
   const query = normalize(hospitalSearch.value.trim());
   const condition = conditionFilter.value;
   const facilityType = facilityFilter.value;
@@ -791,13 +792,14 @@ function filteredHospitals(source = soloHospitals) {
 }
 
 function buildFacilitySource() {
-  return facilityCache.length ? facilityCache : [...seedFacilities, ...soloHospitals];
+  return facilityCache;
 }
 
 function renderHospitalMarkers() {
   hospitalMarkers.forEach((marker) => map.removeLayer(marker));
   hospitalMarkers = [];
   const items = filteredHospitals(buildFacilitySource());
+  if (!items.length) return;
   const nationalMode = regionFilter.value === 'seluruh';
   const quota = nationalMode
     ? { hospital: 8, puskesmas: 6, clinic: 4, pharmacy: 2, other: 2 }
@@ -920,6 +922,11 @@ function chooseHospital(fromLatLng) {
       return ['Rumah Sakit', 'Puskesmas'].includes(getFacilityLabel(hospital));
     })
     .sort((a, b) => b.score - a.score || a.distance - b.distance)[0] || nearestHospital(fromLatLng);
+  if (!candidate) {
+    showError('Belum ada data live OpenStreetMap di area ini.');
+    setStatus('Data live belum tersedia');
+    return;
+  }
   activeHospital = candidate;
   hospitalMarker.setLatLng(activeHospital.latlng);
   drawRoute(fromLatLng, activeHospital.latlng, activeHospital.name);
@@ -960,9 +967,13 @@ async function refreshFacilities(fromLatLng) {
   } catch {
     facilityCache = [];
   } finally {
-    chooseHospital(fromLatLng);
-    renderHospitalMarkers();
-    renderHospitalList();
+    if (facilityCache.length) chooseHospital(fromLatLng);
+    else {
+      showError('Belum ada data live OpenStreetMap di area ini.');
+      setStatus('Data live belum tersedia');
+      renderHospitalList();
+      renderHospitalMarkers();
+    }
   }
 }
 
