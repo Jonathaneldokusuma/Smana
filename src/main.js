@@ -285,7 +285,7 @@ let userDot;
 let routeControl;
 let lastPosition = null;
 let activeCase = 'igd';
-let activeHospital = soloHospitals[0];
+let activeHospital = null;
 let followUser = true;
 let hasCenteredOnUser = false;
 let hospitalMarkers = [];
@@ -861,7 +861,7 @@ function renderHospitalList() {
       <div class="hospital-item-meta">
         <div class="facility-badge">${getFacilityLabel(hospital)}</div>
         <b>${kmText(hospital.distance)}</b>
-        <small>${hospital.source === 'overpass' ? 'OpenStreetMap' : 'Seed nasional'}</small>
+        <small>${hospital.source === 'overpass' ? 'OpenStreetMap' : 'Data lokal'}</small>
       </div>
     `;
     row.addEventListener('click', () => {
@@ -1013,7 +1013,7 @@ function initMap() {
   }, 4000);
 
   ambulanceMarker = L.marker(fallbackCenter, { icon: createPin('ambulance', 'map-pin-ambulance') }).addTo(map);
-  hospitalMarker = L.marker(soloHospitals[0].latlng, { icon: createPin('hospital', 'map-pin-hospital') }).addTo(map);
+  hospitalMarker = L.marker(fallbackCenter, { icon: createPin('hospital', 'map-pin-hospital') }).addTo(map);
   userHalo = L.marker(fallbackCenter, {
     icon: L.divIcon({ className: 'current-ring', iconSize: [40, 40], iconAnchor: [20, 20] }),
     interactive: false,
