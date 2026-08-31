@@ -1066,7 +1066,11 @@ function renderHospitalMarkers() {
       ${getFacilityLabel(hospital)}<br/>
       ${kmText(hospital.distance)} dari titik acuan
     `);
-    marker.on('click', () => openProfileModal(hospital));
+    marker.on('click', () => {
+      marker.closePopup();
+      activeHospital = hospital;
+      openProfileModal(hospital);
+    });
     hospitalMarkers.push(marker);
   });
 }
