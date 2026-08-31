@@ -34,6 +34,8 @@ const profileServicesChip = document.getElementById('profileServicesChip');
 const profileAddress = document.getElementById('profileAddress');
 const profilePriority = document.getElementById('profilePriority');
 const profileAction = document.getElementById('profileAction');
+const profileGalleryImage = document.getElementById('profileGalleryImage');
+const profileGalleryStrip = document.getElementById('profileGalleryStrip');
 const callNote = document.getElementById('callNote');
 const hospitalSearch = document.getElementById('hospitalSearch');
 const conditionFilter = document.getElementById('conditionFilter');
@@ -347,6 +349,8 @@ let hasCenteredOnUser = false;
 let hospitalMarkers = [];
 let facilityCache = [];
 let facilityCacheKey = '';
+let facilityImageRequestId = 0;
+const facilityImageCache = new Map();
 let trackingRetryTimer = null;
 let trackingStarted = false;
 let trackingEnabled = true;
@@ -389,6 +393,109 @@ function getHospitalContact(facility) {
     whatsapp: facility?.whatsapp || null,
   };
 }
+
+function buildImageSearchTerms(facility) {
+  const terms = [];
+  const city = facility?.city || regionSuggestions[facility?.region]?.label || '';
+  const label = getFacilityLabel(facility);
+  if (facility?.name) terms.push(facility.name);
+  if (city) terms.push(`${city} ${label}`.trim());
+  if (city) terms.push(`${city} rumah sakit`.trim());
+  if (city && label !== 'Rumah Sakit') terms.push(`${city} ${label.toLowerCase()}`.trim());
+  if (facility?.region && facility.region !== 'seluruh') terms.push(`${regionSuggestions[facility.region]?.label || facility.region} ${label}`.trim());
+  return [...new Set(terms.filter(Boolean))];
+}
+
+function fallbackGalleryImages(facility) {
+  const label = facility?.name || 'Fasilitas medis';
+  const placeholder = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640"><rect width="100%" height="100%" fill="#0b1220"/><rect x="40" y="40" width="880" height="560" rx="32" fill="#111827" stroke="#243247"/><text x="50%" y="44%" text-anchor="middle" fill="#e5eefb" font-family="Inter,Arial,sans-serif" font-size="34" font-weight="700">Foto asli belum ditemukan</text><text x="50%" y="53%" text-anchor="middle" fill="#91a4bd" font-family="Inter,Arial,sans-serif" font-size="22">${label.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</text></svg>`)}`;
+  return [
+    placeholder,
+  ];
+}
+
+async function fetchOpenverseImages(facility) {
+  const terms = buildImageSearchTerms(facility);
+  for (const term of terms) {
+    const url = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(term)}&page_size=6`;
+    try {
+      const response = await fetch(url, { headers: { Accept: 'application/json' } });
+      if (!response.ok) continue;
+      const data = await response.json();
+      const images = (data.results || [])
+        .map((item) => {
+          const imageUrl = item.url || item.thumbnail || item.thumbnail_url || item.foreign_landing_url || '';
+          const thumbnail = item.thumbnail || item.thumbnail_url || imageUrl;
+          return imageUrl ? {
+            title: item.title || term,
+            url: imageUrl,
+            thumbnail,
+            creator: item.creator || item.source || '',
+            license: item.license || '',
+            source: item.foreign_landing_url || item.url || imageUrl,
+          } : null;
+        })
+        .filter(Boolean);
+      if (images.length) return images;
+    } catch {
+      // Try the next term.
+    }
+  }
+  return fallbackGalleryImages(facility).map((url, index) => ({
+    title: `${facility?.name || 'Fasilitas'} ${index + 1}`,
+    url,
+    thumbnail: url,
+    creator: 'Openverse / fallback',
+    license: 'mixed',
+    source: url,
+  }));
+}
+
+function renderProfileGallery(images, facility) {
+  if (!profileGalleryImage || !profileGalleryStrip) return;
+  const items = images.slice(0, 5);
+  if (!items.length) return;
+  profileGalleryImage.src = items[0].url;
+  profileGalleryImage.alt = `Foto ${facility.name}`;
+  profileGalleryImage.onerror = () => {
+    profileGalleryImage.src = items[0].thumbnail || items[0].url;
+  };
+  profileGalleryStrip.innerHTML = '';
+  items.forEach((item, index) => {
+    const thumb = document.createElement('button');
+    thumb.type = 'button';
+    thumb.className = `profile-gallery-thumb${index === 0 ? ' is-active' : ''}`;
+    thumb.setAttribute('aria-label', item.title || `Foto ${index + 1}`);
+    thumb.innerHTML = `<img src="${item.thumbnail}" alt="" loading="lazy" decoding="async" />`;
+    thumb.addEventListener('click', () => {
+      profileGalleryImage.src = item.url;
+      profileGalleryStrip.querySelectorAll('.profile-gallery-thumb').forEach((node) => node.classList.remove('is-active'));
+      thumb.classList.add('is-active');
+    });
+    profileGalleryStrip.appendChild(thumb);
+  });
+}
+
+async function loadProfileGallery(facility) {
+  if (!profileGalleryImage || !profileGalleryStrip) return;
+  const cacheKey = `${facility.name}|${facility.city || ''}|${facility.region || ''}`;
+  const cached = facilityImageCache.get(cacheKey);
+  if (cached) {
+    renderProfileGallery(cached, facility);
+    return;
+  }
+
+  const requestId = ++facilityImageRequestId;
+  profileGalleryImage.src = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640"><rect width="100%" height="100%" fill="#0b1220"/><text x="50%" y="50%" text-anchor="middle" fill="#91a4bd" font-family="Inter,Arial,sans-serif" font-size="32">Mencari foto asli...</text></svg>')}`;
+  profileGalleryImage.alt = `Mencari foto asli ${facility.name}`;
+  profileGalleryStrip.innerHTML = '';
+
+  const images = await fetchOpenverseImages(facility);
+  if (requestId !== facilityImageRequestId) return;
+  facilityImageCache.set(cacheKey, images);
+  renderProfileGallery(images, facility);
+}
+
 function openProfileModal(facility) {
   const typeLabel = getFacilityLabel(facility);
   const sourceLabel = facility.source === 'overpass' ? 'OpenStreetMap' : 'Seed nasional';
@@ -410,6 +517,7 @@ function openProfileModal(facility) {
   profilePriority.textContent = priorityLabel;
   profileAction.href = `https://www.google.com/maps/search/?api=1&query=${facility.latlng[0]},${facility.latlng[1]}`;
   profileModal.hidden = false;
+  loadProfileGallery(facility);
 }
 
 function updateCallNote() {
