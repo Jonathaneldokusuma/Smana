@@ -34,6 +34,7 @@ const profileServicesChip = document.getElementById('profileServicesChip');
 const profileAddress = document.getElementById('profileAddress');
 const profilePriority = document.getElementById('profilePriority');
 const profileAction = document.getElementById('profileAction');
+const callNote = document.getElementById('callNote');
 const hospitalSearch = document.getElementById('hospitalSearch');
 const conditionFilter = document.getElementById('conditionFilter');
 const facilityFilter = document.getElementById('facilityFilter');
@@ -375,10 +376,19 @@ function hideLocationHint() {
   locationHint.hidden = true;
   locationHint.style.display = 'none';
 }
-function openCallModal() { callModal.hidden = false; }
+function openCallModal() {
+  updateCallNote();
+  callModal.hidden = false;
+}
 function closeCallModal() { callModal.hidden = true; }
 function openFilterModal() { filterModal.hidden = false; renderHospitalList(); }
 function closeFilterModal() { filterModal.hidden = true; }
+function getHospitalContact(facility) {
+  return facility?.contact || {
+    phone: facility?.phone || null,
+    whatsapp: facility?.whatsapp || null,
+  };
+}
 function openProfileModal(facility) {
   const typeLabel = getFacilityLabel(facility);
   const sourceLabel = facility.source === 'overpass' ? 'OpenStreetMap' : 'Seed nasional';
@@ -400,6 +410,26 @@ function openProfileModal(facility) {
   profilePriority.textContent = priorityLabel;
   profileAction.href = `https://www.google.com/maps/search/?api=1&query=${facility.latlng[0]},${facility.latlng[1]}`;
   profileModal.hidden = false;
+}
+
+function updateCallNote() {
+  const contact = getHospitalContact(activeHospital);
+  if (contact.whatsapp || contact.phone) {
+    const bits = [];
+    if (contact.whatsapp) bits.push(`WA ${contact.whatsapp}`);
+    if (contact.phone) bits.push(`Tel ${contact.phone}`);
+    callNote.textContent = `Menggunakan kontak rumah sakit terpilih: ${bits.join(' • ')}`;
+    return;
+  }
+  callNote.textContent = 'Untuk produksi, nomor WhatsApp dan hotline bisa diganti ke kontak rumah sakit yang dipilih pasien.';
+}
+
+function getEmergencyContact() {
+  const contact = getHospitalContact(activeHospital);
+  return {
+    phone: contact.phone || '119',
+    whatsapp: contact.whatsapp || '6281234567890',
+  };
 }
 function closeProfileModal() { profileModal.hidden = true; }
 function openProfileModalWithSwipeGuard(facility) {
@@ -1291,11 +1321,12 @@ callPhoneBtn.addEventListener('click', () => {
   }
   setStatus('Mempersiapkan panggilan telepon...');
   closeCallModal();
-  window.location.href = 'tel:119';
+  const { phone } = getEmergencyContact();
+  window.location.href = `tel:${phone}`;
 });
 
 callWhatsAppBtn.addEventListener('click', () => {
-  const phone = '6281234567890';
+  const { whatsapp, phone } = getEmergencyContact();
   const baseMessage = 'Halo, saya butuh ambulans. Mohon kirim bantuan ke lokasi saya sekarang.';
   setStatus('Mempersiapkan WhatsApp ambulans...');
   closeCallModal();
@@ -1304,11 +1335,11 @@ callWhatsAppBtn.addEventListener('click', () => {
       const { latitude, longitude } = position.coords;
       const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
       const message = encodeURIComponent(`${baseMessage}\nLokasi saya: ${mapsLink}`);
-      window.open(`https://wa.me/${phone}?text=${message}`, '_blank', 'noopener,noreferrer');
+      window.open(`https://wa.me/${whatsapp || phone}?text=${message}`, '_blank', 'noopener,noreferrer');
     })
     .catch(() => {
       const message = encodeURIComponent(baseMessage);
-      window.open(`https://wa.me/${phone}?text=${message}`, '_blank', 'noopener,noreferrer');
+      window.open(`https://wa.me/${whatsapp || phone}?text=${message}`, '_blank', 'noopener,noreferrer');
     });
 });
 
