@@ -459,7 +459,7 @@ function renderProfileGallery(images, facility) {
   if (!profileGalleryImage || !profileGalleryStrip) return;
   const items = images.slice(0, 5);
   if (!items.length) return;
-  profileGalleryImage.src = items[0].url;
+  profileGalleryImage.src = items[0].thumbnail || items[0].url;
   profileGalleryImage.alt = `Foto ${facility.name}`;
   profileGalleryImage.onerror = () => {
     profileGalleryImage.src = items[0].thumbnail || items[0].url;
@@ -472,7 +472,7 @@ function renderProfileGallery(images, facility) {
     thumb.setAttribute('aria-label', item.title || `Foto ${index + 1}`);
     thumb.innerHTML = `<img src="${item.thumbnail}" alt="" loading="lazy" decoding="async" />`;
     thumb.addEventListener('click', () => {
-      profileGalleryImage.src = item.url;
+      profileGalleryImage.src = item.thumbnail || item.url;
       profileGalleryImage.alt = item.title || `Foto ${facility.name}`;
       profileGalleryStrip.querySelectorAll('.profile-gallery-thumb').forEach((node) => node.classList.remove('is-active'));
       thumb.classList.add('is-active');
@@ -500,6 +500,12 @@ async function loadProfileGallery(facility) {
   facilityImageCache.set(cacheKey, images);
   renderProfileGallery(images, facility);
 }
+
+profileGalleryImage?.addEventListener('click', () => {
+  const activeThumb = profileGalleryStrip?.querySelector('.profile-gallery-thumb.is-active img');
+  const src = activeThumb?.src || profileGalleryImage.src;
+  if (src) window.open(src, '_blank', 'noopener,noreferrer');
+});
 
 function openProfileModal(facility) {
   const typeLabel = getFacilityLabel(facility);
@@ -1410,11 +1416,6 @@ const indonesiaBounds = L.latLngBounds([[-11.5, 94.5], [6.7, 141.5]]);
 
 zoomInBtn.addEventListener('click', () => map.zoomIn());
 zoomOutBtn.addEventListener('click', () => {
-  const currentZoom = map.getZoom();
-  if (regionFilter.value === 'seluruh' || currentZoom <= 5) {
-    map.fitBounds(indonesiaBounds, { padding: [24, 24] });
-    return;
-  }
   map.zoomOut();
 });
 
