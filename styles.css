@@ -551,6 +551,7 @@ body {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  color-scheme: dark;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
@@ -574,13 +575,17 @@ body {
 
 .filter-select option {
   color: #e8f1fb;
-  background: #111827;
+  background-color: #0b1220;
 }
 
 .filter-select option:checked,
 .filter-select option:hover {
   color: #ffffff;
-  background: #1f6feb;
+  background-color: #1f6feb;
+}
+
+.filter-select option:disabled {
+  color: #7f8ea6;
 }
 
 .filter-summary {
