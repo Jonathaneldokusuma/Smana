@@ -319,13 +319,13 @@ function openFilterModal() { filterModal.hidden = false; renderHospitalList(); }
 function closeFilterModal() { filterModal.hidden = true; }
 function openProfileModal(facility) {
   const typeLabel = getFacilityLabel(facility);
-  const sourceLabel = facility.source === 'overpass' ? 'OpenStreetMap' : 'Data lokal';
+  const sourceLabel = facility.source === 'overpass' ? 'OpenStreetMap' : 'Seed nasional';
   const priorityLabel = regionFilter.value === 'seluruh'
     ? 'Diprioritaskan otomatis untuk nasional'
     : `Diprioritaskan untuk ${getConditionLabel(conditionFilter.value).toLowerCase()}`;
   profileName.textContent = facility.name;
   profileBadge.textContent = getMarkerLabel(facility);
-  profileTypeLabel.textContent = `${typeLabel}${facility.source === 'overpass' ? ' • Data live' : ' • Data lokal'}`;
+  profileTypeLabel.textContent = `${typeLabel}${facility.source === 'overpass' ? ' • Data live' : ' • Profil demo'}`;
   profileTypeChip.textContent = typeLabel;
   profileDistance.textContent = `${kmText(facility.distance)} dari lokasi acuan`;
   profileServices.textContent = facility.source === 'overpass'
@@ -755,7 +755,7 @@ async function fetchFacilities(fromLatLng) {
     })
     .filter(Boolean);
 
-  facilityCache = facilities;
+  facilityCache = [...seedFacilities, ...facilities];
   facilityCacheKey = cacheKey;
   return facilityCache;
 }
@@ -792,7 +792,7 @@ function filteredHospitals(source = facilityCache) {
 }
 
 function buildFacilitySource() {
-  return facilityCache;
+  return facilityCache.length ? facilityCache : [...seedFacilities, ...soloHospitals];
 }
 
 function renderHospitalMarkers() {
@@ -861,7 +861,7 @@ function renderHospitalList() {
       <div class="hospital-item-meta">
         <div class="facility-badge">${getFacilityLabel(hospital)}</div>
         <b>${kmText(hospital.distance)}</b>
-        <small>${hospital.source === 'overpass' ? 'OpenStreetMap' : 'Data lokal'}</small>
+        <small>${hospital.source === 'overpass' ? 'OpenStreetMap' : 'Seed nasional'}</small>
       </div>
     `;
     row.addEventListener('click', () => {
@@ -923,8 +923,8 @@ function chooseHospital(fromLatLng) {
     })
     .sort((a, b) => b.score - a.score || a.distance - b.distance)[0] || nearestHospital(fromLatLng);
   if (!candidate) {
-    showError('Belum ada data live OpenStreetMap di area ini.');
-    setStatus('Data live belum tersedia');
+    showError('Data live belum tersedia, memakai data seed nasional.');
+    setStatus('Memakai data seed nasional');
     return;
   }
   activeHospital = candidate;
@@ -962,18 +962,14 @@ async function refreshFacilities(fromLatLng) {
   try {
     setStatus('Mencari fasilitas medis terdekat...');
     const facilities = await fetchFacilities(fromLatLng);
-    facilityCache = facilities;
+    facilityCache = [...seedFacilities, ...facilities];
     facilityCacheKey = `${fromLatLng[0].toFixed(3)}:${fromLatLng[1].toFixed(3)}:${conditionFilter.value}:${regionFilter.value}:${hospitalSearch.value.trim().toLowerCase()}`;
   } catch {
     facilityCache = [];
   } finally {
-    if (facilityCache.length) chooseHospital(fromLatLng);
-    else {
-      showError('Belum ada data live OpenStreetMap di area ini.');
-      setStatus('Data live belum tersedia');
-      renderHospitalList();
-      renderHospitalMarkers();
-    }
+    chooseHospital(fromLatLng);
+    renderHospitalMarkers();
+    renderHospitalList();
   }
 }
 
