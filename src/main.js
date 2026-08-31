@@ -843,6 +843,9 @@ function filteredHospitals(source = facilityCache) {
         + nationalPriorityBoost(hospital),
     }))
     .sort((a, b) => {
+      if (regionFilter.value === 'auto') {
+        return a.distance - b.distance || b.score - a.score;
+      }
       if (limitedFacilityMode) {
         return a.distance - b.distance || b.score - a.score;
       }
