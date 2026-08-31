@@ -544,14 +544,43 @@ body {
   min-height: 48px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(12, 18, 28, 0.98);
   color: var(--text);
   padding: 0 14px;
   outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .filter-input::placeholder {
   color: rgba(157, 176, 199, 0.75);
+}
+
+.filter-select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(67, 224, 180, 0.95) 50%),
+    linear-gradient(135deg, rgba(67, 224, 180, 0.95) 50%, transparent 50%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03));
+  background-position:
+    calc(100% - 18px) 19px,
+    calc(100% - 12px) 19px,
+    0 0;
+  background-size: 6px 6px, 6px 6px, 100% 100%;
+  background-repeat: no-repeat;
+  padding-right: 42px;
+}
+
+.filter-select option {
+  color: #e8f1fb;
+  background: #111827;
+}
+
+.filter-select option:checked,
+.filter-select option:hover {
+  color: #ffffff;
+  background: #1f6feb;
 }
 
 .filter-summary {
