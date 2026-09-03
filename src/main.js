@@ -403,19 +403,34 @@ function formatSimulationLocation() {
   if (!lastPosition) return 'GPS belum tersedia';
   return `${lastPosition[0].toFixed(5)}, ${lastPosition[1].toFixed(5)}`;
 }
-function animateSimulationMarker(from, to, duration, done) {
+function animateMarkerAlongRoad(points, duration, done) {
+  if (!points?.length) return done?.();
   const started = performance.now();
   const frame = (now) => {
     const progress = Math.min(1, (now - started) / duration);
-    const eased = progress * (2 - progress);
+    const scaled = progress * (points.length - 1);
+    const index = Math.min(points.length - 2, Math.floor(scaled));
+    const local = points.length === 1 ? 1 : scaled - index;
+    const from = points[index] || points[0];
+    const to = points[index + 1] || points[points.length - 1];
     ambulanceMarker.setLatLng([
-      from[0] + (to[0] - from[0]) * eased,
-      from[1] + (to[1] - from[1]) * eased,
+      from[0] + (to[0] - from[0]) * local,
+      from[1] + (to[1] - from[1]) * local,
     ]);
     if (progress < 1) requestAnimationFrame(frame);
     else done?.();
   };
   requestAnimationFrame(frame);
+}
+async function getRoadCoordinates(from, to) {
+  try {
+    const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`, { signal: AbortSignal.timeout(12000) });
+    if (!response.ok) throw new Error('OSRM route error');
+    const route = (await response.json()).routes?.[0];
+    return route?.geometry?.coordinates?.map(([lng, lat]) => [lat, lng]) || null;
+  } catch {
+    return null;
+  }
 }
 function startEmergencySimulation() {
   if (!lastPosition) {
@@ -431,6 +446,8 @@ function startEmergencySimulation() {
   }
   simulationRunning = true;
   const patient = [...lastPosition];
+  const destination = [...activeHospital.latlng];
+  const destinationName = activeHospital.name;
   const ambulanceUnits = [
     { id: 'AMB-001', status: 'Available', offset: [0.012, -0.015] },
     { id: 'AMB-002', status: 'Busy', offset: [-0.018, 0.012] },
@@ -443,7 +460,7 @@ function startEmergencySimulation() {
     '🚑 Pencocokan armada: AMB-001 tersedia, AMB-002 sibuk',
     `✓ ${assigned.id} ditugaskan • status: menuju lokasi pasien`,
     '🩺 Asesmen medis awal selesai',
-    `🏥 RS terdekat direkomendasikan: ${activeHospital.name}`,
+    `🏥 RS terdekat direkomendasikan: ${destinationName}`,
     '📣 Notifikasi pra-kedatangan dikirim ke rumah sakit tujuan',
     '🗺️ Rute jalan aktif melalui Leaflet + OSRM',
   ];
@@ -457,14 +474,18 @@ function startEmergencySimulation() {
   callModal.hidden = false;
   ambulanceMarker.setLatLng(start).setOpacity(1);
   setStatus(`${assigned.id} ditugaskan • menuju pasien`);
-  animateSimulationMarker(start, patient, 2600, () => {
-    setStatus(`Pasien dijemput • menuju ${activeHospital.name}`);
-    animateSimulationMarker(patient, activeHospital.latlng, 5000, () => {
-      setStatus(`Simulasi selesai • tiba di ${activeHospital.name}`);
-      callNote.textContent += '\n\n🏁 AMBULANS TIBA • simulasi selesai';
-      callPhoneBtn.disabled = false;
-      callPhoneBtn.textContent = 'Ulangi simulasi';
-      simulationRunning = false;
+  Promise.all([getRoadCoordinates(start, patient), getRoadCoordinates(patient, destination)]).then(([toPatient, toHospital]) => {
+    const patientRoute = toPatient || [start, patient];
+    const hospitalRoute = toHospital || [patient, activeHospital.latlng];
+    animateMarkerAlongRoad(patientRoute, 3200, () => {
+      setStatus(`Pasien dijemput • menuju ${destinationName}`);
+      animateMarkerAlongRoad(hospitalRoute, 6200, () => {
+        setStatus(`Simulasi selesai • tiba di ${destinationName}`);
+        callNote.textContent += '\n\n🏁 AMBULANS TIBA • simulasi selesai';
+        callPhoneBtn.disabled = false;
+        callPhoneBtn.textContent = 'Ulangi simulasi';
+        simulationRunning = false;
+      });
     });
   });
 }
