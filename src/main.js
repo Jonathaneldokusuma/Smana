@@ -460,17 +460,22 @@ function startEmergencySimulation() {
   const patient = [...lastPosition];
   const destination = [...activeHospital.latlng];
   const destinationName = activeHospital.name;
+  const ambulanceBase = buildFacilitySource()
+    .filter((facility) => getFacilityLabel(facility) === 'Rumah Sakit' && facility.name !== destinationName)
+    .map((facility) => ({ ...facility, distance: haversineKm(patient, facility.latlng) }))
+    .sort((a, b) => a.distance - b.distance)[0];
   const ambulanceUnits = [
-    { id: 'AMB-001', status: 'Available', offset: [0.012, -0.015] },
-    { id: 'AMB-002', status: 'Busy', offset: [-0.018, 0.012] },
+    { id: 'AMB-001', status: 'Available', base: ambulanceBase },
+    { id: 'AMB-002', status: 'Busy', base: ambulanceBase },
   ];
   const assigned = ambulanceUnits.find((unit) => unit.status === 'Available');
-  const start = [patient[0] + assigned.offset[0], patient[1] + assigned.offset[1]];
+  const start = assigned.base?.latlng || patient;
+  const baseName = assigned.base?.name || 'Pos ambulans simulasi terdekat';
   const steps = [
     `🚨 PERMINTAAN DARURAT • kondisi: ${getConditionLabel(activeCase)}`,
     `📍 Lokasi pasien terdeteksi • ${formatSimulationLocation()}`,
-    '🚑 Pencocokan armada: AMB-001 tersedia, AMB-002 sibuk',
-    `✓ ${assigned.id} ditugaskan • status: menuju lokasi pasien`,
+    `🚑 Pencocokan armada: AMB-001 tersedia dari ${baseName}, AMB-002 sibuk`,
+    `✓ ${assigned.id} ditugaskan dari ${baseName} • menuju lokasi pasien`,
     '🩺 Asesmen medis awal selesai',
     `🏥 RS terdekat direkomendasikan: ${destinationName}`,
     '📣 Notifikasi pra-kedatangan dikirim ke rumah sakit tujuan',
