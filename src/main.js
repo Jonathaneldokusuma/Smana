@@ -362,6 +362,7 @@ let trackingWatchId = null;
 let profileTouchStartY = 0;
 let profileTouchEndY = 0;
 let simulationRunning = false;
+let simulationFinished = false;
 
 // Neutral map center only; never use a developer location for distance or routing.
 const fallbackCenter = [-2.5, 118.0];
@@ -389,6 +390,7 @@ function hideLocationHint() {
 }
 function openCallModal() {
   if (simulationRunning) return;
+  simulationFinished = false;
   callTitle.textContent = 'Mulai simulasi darurat?';
   callCopy.textContent = 'Mode demo untuk presentasi hackathon. Tidak ada panggilan telepon atau WhatsApp yang dikirim.';
   callNote.textContent = 'Pilih kondisi pasien terlebih dahulu agar simulasi dapat memilih tujuan yang sesuai.';
@@ -461,8 +463,9 @@ function startEmergencySimulation() {
   const destination = [...activeHospital.latlng];
   const destinationName = activeHospital.name;
   const ambulanceBase = buildFacilitySource()
-    .filter((facility) => getFacilityLabel(facility) === 'Rumah Sakit' && facility.name !== destinationName)
+    .filter((facility) => ['Rumah Sakit', 'Puskesmas', 'Klinik'].includes(getFacilityLabel(facility)) && facility.name !== destinationName)
     .map((facility) => ({ ...facility, distance: haversineKm(patient, facility.latlng) }))
+    .filter((facility) => facility.distance > 0.2)
     .sort((a, b) => a.distance - b.distance)[0];
   const ambulanceUnits = [
     { id: 'AMB-001', status: 'Available', base: ambulanceBase },
@@ -504,6 +507,7 @@ function startEmergencySimulation() {
         callPhoneBtn.disabled = false;
         callPhoneBtn.textContent = 'Ulangi simulasi';
         simulationRunning = false;
+        simulationFinished = true;
       });
     });
   });
@@ -1308,7 +1312,7 @@ function setUserPosition(position) {
   const { latitude, longitude, accuracy } = position.coords;
   const next = [latitude, longitude];
   lastPosition = next;
-  ambulanceMarker.setLatLng(next).setOpacity(1);
+  if (!simulationRunning && !simulationFinished) ambulanceMarker.setLatLng(next).setOpacity(1);
   userHalo.setLatLng(next).setOpacity(1);
   userDot.setLatLng(next).setOpacity(1);
   hideLocationHint();
@@ -1326,7 +1330,7 @@ function setUserPosition(position) {
     map.panTo(next, { animate: true, duration: 0.5 });
   }
   setStatus(`Lokasi Anda • akurasi ±${Math.round(accuracy)} m`);
-  refreshFacilities(next).catch(() => {});
+  if (!simulationRunning && !simulationFinished) refreshFacilities(next).catch(() => {});
 }
 
 async function refreshFacilities(fromLatLng) {
