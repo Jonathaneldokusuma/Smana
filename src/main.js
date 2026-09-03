@@ -10,6 +10,8 @@ const mobileCallBtn = document.getElementById('mobileCallBtn');
 const mobileFilterBtn = document.getElementById('mobileFilterBtn');
 const callModal = document.getElementById('callModal');
 const callCloseBtn = document.getElementById('callCloseBtn');
+const callTitle = document.getElementById('callTitle');
+const callCopy = document.querySelector('.call-copy');
 const callPhoneBtn = document.getElementById('callPhoneBtn');
 const callWhatsAppBtn = document.getElementById('callWhatsAppBtn');
 const zoomInBtn = document.getElementById('zoomInBtn');
@@ -358,6 +360,7 @@ let trackingEnabled = true;
 let trackingWatchId = null;
 let profileTouchStartY = 0;
 let profileTouchEndY = 0;
+let simulationRunning = false;
 
 // Neutral map center only; never use a developer location for distance or routing.
 const fallbackCenter = [-2.5, 118.0];
@@ -384,10 +387,87 @@ function hideLocationHint() {
   locationHint.style.display = 'none';
 }
 function openCallModal() {
+  if (simulationRunning) return;
+  callTitle.textContent = 'Mulai simulasi darurat?';
+  callCopy.textContent = 'Mode demo untuk presentasi hackathon. Tidak ada panggilan telepon atau WhatsApp yang dikirim.';
+  callNote.textContent = 'Pilih kondisi pasien terlebih dahulu agar simulasi dapat memilih tujuan yang sesuai.';
+  callNote.style.whiteSpace = '';
+  callPhoneBtn.disabled = false;
+  callPhoneBtn.textContent = 'Mulai simulasi';
+  callWhatsAppBtn.textContent = 'Tutup';
   updateCallNote();
   callModal.hidden = false;
 }
 function closeCallModal() { callModal.hidden = true; }
+function formatSimulationLocation() {
+  if (!lastPosition) return 'GPS belum tersedia';
+  return `${lastPosition[0].toFixed(5)}, ${lastPosition[1].toFixed(5)}`;
+}
+function animateSimulationMarker(from, to, duration, done) {
+  const started = performance.now();
+  const frame = (now) => {
+    const progress = Math.min(1, (now - started) / duration);
+    const eased = progress * (2 - progress);
+    ambulanceMarker.setLatLng([
+      from[0] + (to[0] - from[0]) * eased,
+      from[1] + (to[1] - from[1]) * eased,
+    ]);
+    if (progress < 1) requestAnimationFrame(frame);
+    else done?.();
+  };
+  requestAnimationFrame(frame);
+}
+function startEmergencySimulation() {
+  if (!lastPosition) {
+    closeCallModal();
+    showLocationHint('Aktifkan GPS agar simulasi memakai lokasi pengguna yang sebenarnya.');
+    setStatus('Simulasi menunggu GPS pengguna');
+    return;
+  }
+  if (!activeHospital) {
+    closeCallModal();
+    showError('RS tujuan belum ditemukan di sekitar lokasi Anda.');
+    return;
+  }
+  simulationRunning = true;
+  const patient = [...lastPosition];
+  const ambulanceUnits = [
+    { id: 'AMB-001', status: 'Available', offset: [0.012, -0.015] },
+    { id: 'AMB-002', status: 'Busy', offset: [-0.018, 0.012] },
+  ];
+  const assigned = ambulanceUnits.find((unit) => unit.status === 'Available');
+  const start = [patient[0] + assigned.offset[0], patient[1] + assigned.offset[1]];
+  const steps = [
+    `🚨 PERMINTAAN DARURAT • kondisi: ${getConditionLabel(activeCase)}`,
+    `📍 Lokasi pasien terdeteksi • ${formatSimulationLocation()}`,
+    '🚑 Pencocokan armada: AMB-001 tersedia, AMB-002 sibuk',
+    `✓ ${assigned.id} ditugaskan • status: menuju lokasi pasien`,
+    '🩺 Asesmen medis awal selesai',
+    `🏥 RS terdekat direkomendasikan: ${activeHospital.name}`,
+    '📣 Notifikasi pra-kedatangan dikirim ke rumah sakit tujuan',
+    '🗺️ Rute jalan aktif melalui Leaflet + OSRM',
+  ];
+  callTitle.textContent = `Simulasi darurat • ${assigned.id}`;
+  callCopy.textContent = 'Ini simulasi untuk demo. Tidak menelepon 119 dan tidak mengirim WhatsApp.';
+  callNote.textContent = steps.join('\n');
+  callNote.style.whiteSpace = 'pre-line';
+  callPhoneBtn.textContent = 'Simulasi berjalan...';
+  callPhoneBtn.disabled = true;
+  callWhatsAppBtn.textContent = 'Tutup';
+  callModal.hidden = false;
+  ambulanceMarker.setLatLng(start).setOpacity(1);
+  setStatus(`${assigned.id} ditugaskan • menuju pasien`);
+  animateSimulationMarker(start, patient, 2600, () => {
+    setStatus(`Pasien dijemput • menuju ${activeHospital.name}`);
+    animateSimulationMarker(patient, activeHospital.latlng, 5000, () => {
+      setStatus(`Simulasi selesai • tiba di ${activeHospital.name}`);
+      callNote.textContent += '\n\n🏁 AMBULANS TIBA • simulasi selesai';
+      callPhoneBtn.disabled = false;
+      callPhoneBtn.textContent = 'Ulangi simulasi';
+      simulationRunning = false;
+    });
+  });
+}
 function openFilterModal() { filterModal.hidden = false; renderHospitalList(); }
 function closeFilterModal() { filterModal.hidden = true; }
 function getHospitalContact(facility) {
@@ -1448,33 +1528,11 @@ callCloseBtn.addEventListener('click', (event) => { event.preventDefault(); even
 callModal.addEventListener('click', (event) => { if (event.target === callModal) closeCallModal(); });
 
 callPhoneBtn.addEventListener('click', () => {
-  const confirmed = window.confirm('Peringatan: Anda akan langsung menelepon 119. Lanjutkan?');
-  if (!confirmed) {
-    setStatus('Panggilan dibatalkan');
-    return;
-  }
-  setStatus('Mempersiapkan panggilan telepon...');
-  closeCallModal();
-  const { phone } = getEmergencyContact();
-  window.location.href = `tel:${phone}`;
+  startEmergencySimulation();
 });
 
 callWhatsAppBtn.addEventListener('click', () => {
-  const { whatsapp, phone } = getEmergencyContact();
-  const baseMessage = 'Halo, saya butuh ambulans. Mohon kirim bantuan ke lokasi saya sekarang.';
-  setStatus('Mempersiapkan WhatsApp ambulans...');
   closeCallModal();
-  getCurrentPosition()
-    .then((position) => {
-      const { latitude, longitude } = position.coords;
-      const mapsLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-      const message = encodeURIComponent(`${baseMessage}\nLokasi saya: ${mapsLink}`);
-      window.open(`https://wa.me/${whatsapp || phone}?text=${message}`, '_blank', 'noopener,noreferrer');
-    })
-    .catch(() => {
-      const message = encodeURIComponent(baseMessage);
-      window.open(`https://wa.me/${whatsapp || phone}?text=${message}`, '_blank', 'noopener,noreferrer');
-    });
 });
 
 renderCases();
