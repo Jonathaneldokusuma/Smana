@@ -344,6 +344,7 @@ let userHalo;
 let userDot;
 let routeControl;
 let activeRouteTarget = null;
+let simulationRouteLine = null;
 let lastPosition = null;
 let activeCase = 'igd';
 let activeHospital = null;
@@ -422,6 +423,17 @@ function animateMarkerAlongRoad(points, duration, done) {
   };
   requestAnimationFrame(frame);
 }
+function showSimulationRoute(points) {
+  if (simulationRouteLine) map.removeLayer(simulationRouteLine);
+  simulationRouteLine = L.polyline(points, {
+    color: '#ffbd4a',
+    weight: 7,
+    opacity: 0.96,
+    dashArray: '2 10',
+    lineCap: 'round',
+    interactive: false,
+  }).addTo(map);
+}
 async function getRoadCoordinates(from, to) {
   try {
     const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`, { signal: AbortSignal.timeout(12000) });
@@ -476,9 +488,11 @@ function startEmergencySimulation() {
   setStatus(`${assigned.id} ditugaskan • menuju pasien`);
   Promise.all([getRoadCoordinates(start, patient), getRoadCoordinates(patient, destination)]).then(([toPatient, toHospital]) => {
     const patientRoute = toPatient || [start, patient];
-    const hospitalRoute = toHospital || [patient, activeHospital.latlng];
+    const hospitalRoute = toHospital || [patient, destination];
+    showSimulationRoute(patientRoute);
     animateMarkerAlongRoad(patientRoute, 3200, () => {
       setStatus(`Pasien dijemput • menuju ${destinationName}`);
+      showSimulationRoute(hospitalRoute);
       animateMarkerAlongRoad(hospitalRoute, 6200, () => {
         setStatus(`Simulasi selesai • tiba di ${destinationName}`);
         callNote.textContent += '\n\n🏁 AMBULANS TIBA • simulasi selesai';
